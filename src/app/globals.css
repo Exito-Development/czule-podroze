@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────
+   Czuła Podróż — design tokens
+   Paleta: ivory / beż / ecru + szałwiowa zieleń + przygaszony róż
+   ────────────────────────────────────────────────────────── */
+@theme {
+  --color-ivory: #faf6ef;
+  --color-cream: #f4ede1;
+  --color-sand: #e9dcc8;
+  --color-ecru: #ddcbb0;
+  --color-sage: #9aa886;
+  --color-sage-dark: #76856a;
+  --color-blush: #e9b9bb;
+  --color-blush-soft: #f3d6d7;
+  --color-blush-pale: #f9ecec;
+  --color-sage-pale: #eaeee2;
+  --color-ink: #3a342c;
+  --color-ink-soft: #6b6356;
+
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-script: var(--font-script), cursive;
+  --font-display: var(--font-display), "Cooper Black", serif;
+
+  --radius-soft: 1.75rem;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-ivory);
+}
+
+/* Gdy aktywny jest Lenis, sterujemy scrollem programowo. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-blush-soft);
+  color: var(--color-ink);
+}
+
+/* Klasy pomocnicze */
+.font-serif {
+  font-family: var(--font-serif);
+}
+.font-script {
+  font-family: var(--font-script);
+}
+.font-display {
+  font-family: var(--font-display);
+}
+
+.section-pad {
+  padding-inline: clamp(1.25rem, 5vw, 6rem);
+}
+
+/* Spójny, ciaśniejszy rytm pionowy sekcji. */
+.section-y {
+  padding-block: clamp(3.5rem, 7vw, 5.5rem);
+}
+
+/* Przewijający się pasek (marquee) */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 28s linear infinite;
+}
+
+/* Dla osób preferujących mniej ruchu — wyłączamy animacje wejścia. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
