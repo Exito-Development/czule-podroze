@@ -1,0 +1,29 @@
+# Profil lokalny — uruchomienie bez żadnej zewnętrznej infrastruktury.
+# Baza H2 w pliku (dane przeżywają restart), atrapa płatności, dane startowe.
+spring:
+  datasource:
+    url: jdbc:h2:file:./.data/czula;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  flyway:
+    # Oprócz schematu wgrywamy też przykładowe wyjazdy.
+    locations: classpath:db/migration,classpath:db/seed
+
+czula:
+  security:
+    jwt:
+      # Sekret wyłącznie na lokalne środowisko. Produkcja bierze go z ENV.
+      secret: ${JWT_SECRET:lokalny-sekret-do-developmentu-czula-podroz-2026}
+  payments:
+    provider: mock
+    webhook-secret: ${PAYMENTS_WEBHOOK_SECRET:lokalny-sekret-webhooka}
+  admin:
+    # Konto organizatorki zakładane przy starcie, jeśli jeszcze nie istnieje.
+    bootstrap-email: admin@czulapodroz.pl
+    bootstrap-password: ${ADMIN_PASSWORD:CzulaPodroz2026!}
+
+logging:
+  level:
+    pl.czulapodroz.api: DEBUG
+    org.hibernate.SQL: INFO

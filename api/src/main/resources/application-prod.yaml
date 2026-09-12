@@ -1,0 +1,20 @@
+# Profil produkcyjny — wszystko wrażliwe pochodzi ze zmiennych środowiskowych.
+# Aplikacja nie wstanie bez JWT_SECRET i danych bazy; to celowe.
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+  flyway:
+    # Bez danych przykładowych.
+    locations: classpath:db/migration
+
+czula:
+  payments:
+    provider: ${PAYMENTS_PROVIDER:mock}
+
+logging:
+  level:
+    pl.czulapodroz.api: INFO

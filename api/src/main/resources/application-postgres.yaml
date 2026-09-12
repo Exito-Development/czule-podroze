@@ -1,0 +1,18 @@
+# Profil dla lokalnego PostgreSQL-a z docker-compose (`docker compose up -d db`).
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/czula}
+    username: ${DATABASE_USER:czula}
+    password: ${DATABASE_PASSWORD:czula}
+  flyway:
+    locations: classpath:db/migration,classpath:db/seed
+
+czula:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:lokalny-sekret-do-developmentu-czula-podroz-2026}
+  payments:
+    webhook-secret: ${PAYMENTS_WEBHOOK_SECRET:lokalny-sekret-webhooka}
+  admin:
+    bootstrap-email: ${ADMIN_EMAIL:admin@czulapodroz.pl}
+    bootstrap-password: ${ADMIN_PASSWORD:CzulaPodroz2026!}

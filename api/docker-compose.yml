@@ -1,0 +1,43 @@
+# Lokalne uruchomienie API na PostgreSQL-u:
+#   docker compose up -d db     # sama baza, API z `mvn spring-boot:run -Dspring-boot.run.profiles=postgres`
+#   docker compose up --build   # baza + API w kontenerach
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: czula-db
+    environment:
+      POSTGRES_DB: czula
+      POSTGRES_USER: czula
+      POSTGRES_PASSWORD: czula
+    ports:
+      - "5432:5432"
+    volumes:
+      - czula-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U czula -d czula"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    container_name: czula-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DATABASE_URL: jdbc:postgresql://db:5432/czula
+      DATABASE_USER: czula
+      DATABASE_PASSWORD: czula
+      FRONTEND_BASE_URL: http://localhost:3002
+      API_BASE_URL: http://localhost:8080
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3002
+      JWT_SECRET: lokalny-sekret-do-developmentu-czula-podroz-2026
+      PAYMENTS_WEBHOOK_SECRET: lokalny-sekret-webhooka
+      ADMIN_PASSWORD: CzulaPodroz2026!
+    ports:
+      - "8080:8080"
+
+volumes:
+  czula-db-data:
