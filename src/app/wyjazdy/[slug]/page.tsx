@@ -6,7 +6,7 @@ import {
   formatDateRange,
 } from "@/lib/data/trips";
 import BookingBox from "@/components/shop/BookingBox";
-import Footer from "@/components/layout/Footer";
+import FooterReveal from "@/components/layout/FooterReveal";
 
 export function generateStaticParams() {
   return getTrips().map((t) => ({ slug: t.slug }));
@@ -34,7 +34,7 @@ export default async function TripPage({
   return (
     <main>
       {/* Hero wyjazdu */}
-      <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden">
+      <section className="relative z-10 h-[60vh] min-h-[420px] w-full overflow-hidden bg-ink">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={trip.coverImage}
@@ -51,7 +51,7 @@ export default async function TripPage({
         </div>
       </section>
 
-      <section className="section-pad bg-ivory py-16">
+      <section className="section-pad relative z-10 bg-ivory py-16">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <p className="text-sm text-ink-soft">
@@ -101,7 +101,7 @@ export default async function TripPage({
         </div>
       </section>
 
-      <Footer />
+      <FooterReveal />
     </main>
   );
 }

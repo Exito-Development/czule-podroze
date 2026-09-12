@@ -13,12 +13,15 @@ const slides = [
     title: "Przygoda życia",
     text: "Trzy raje, jedna czuła podróż. Słońce, warsztaty, ruch i czas tylko dla siebie.",
     href: "#destynacje",
+    transition: undefined as { title: string; image: string } | undefined,
   },
   ...trips.map((t) => ({
     eyebrow: `${t.country} · ${t.durationDays} dni`,
     title: t.title,
     text: t.tagline,
     href: `/wyjazdy/${t.slug}`,
+    /* Dane dla kurtyny przejścia (RouteTransition). */
+    transition: { title: t.title, image: t.coverImage },
   })),
 ];
 
@@ -101,6 +104,11 @@ export default function Hero() {
           <a
             data-anim
             href={slides[active].href}
+            data-transition-title={slides[active].transition?.title}
+            data-transition-eyebrow={
+              slides[active].transition ? slides[active].eyebrow : undefined
+            }
+            data-transition-image={slides[active].transition?.image}
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-ivory px-7 py-4 text-sm font-medium text-ink transition-transform hover:scale-[1.03]"
           >
             Odkryj podróż

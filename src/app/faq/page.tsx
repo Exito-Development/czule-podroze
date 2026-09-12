@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { faqItems } from "@/lib/data/faq";
-import Footer from "@/components/layout/Footer";
+import FooterReveal from "@/components/layout/FooterReveal";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function FaqPage() {
   return (
     <main>
-      <section className="section-pad bg-ivory pb-16 pt-36">
+      <section className="section-pad relative z-10 bg-ivory pb-16 pt-36">
         <div className="mx-auto max-w-3xl">
           <p className="text-sm uppercase tracking-[0.3em] text-sage-dark">
             Pomoc
@@ -37,7 +37,7 @@ export default function FaqPage() {
           </div>
         </div>
       </section>
-      <Footer />
+      <FooterReveal />
     </main>
   );
 }

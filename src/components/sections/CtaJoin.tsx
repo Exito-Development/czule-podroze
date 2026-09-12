@@ -5,14 +5,17 @@ import { useCart } from "@/components/providers/CartContext";
 import ParallaxImg from "@/components/anim/ParallaxImg";
 
 /**
- * "Chcę jechać!" — tekst po lewej, tło z palmami/morzem,
- * zaokrąglone dolne krawędzie z przejściem w stopkę.
+ * "Chcę jechać!" — tekst po lewej, tło z palmami/morzem.
+ *
+ * Sekcja kończy stronę pełnym kadrem (bez zaokrągleń, które zostawiały
+ * pasek pustego tła) i działa jak kurtyna: przy przewijaniu wyjeżdża w górę,
+ * odsłaniając stopkę czekającą pod spodem (patrz <FooterReveal />).
  */
 export default function CtaJoin() {
   const { open } = useCart();
 
   return (
-    <section className="section-pad relative overflow-hidden rounded-b-[3rem] py-24 md:py-32">
+    <section className="section-pad relative overflow-hidden py-24 md:py-32">
       {/* Tło z paralaksą — palmy i morze */}
       <ParallaxImg src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2000&auto=format&fit=crop" />
       <div className="absolute inset-0 bg-gradient-to-r from-ink/60 via-ink/35 to-ink/10" />

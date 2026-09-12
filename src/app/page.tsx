@@ -2,13 +2,13 @@ import Hero from "@/components/sections/Hero";
 import Marquee from "@/components/sections/Marquee";
 import About from "@/components/sections/About";
 import Destinations from "@/components/sections/Destinations";
-import Itinerary from "@/components/sections/Itinerary";
+import TripTimeline from "@/components/sections/TripTimeline";
 import Workshops from "@/components/sections/Workshops";
 import WhyUs from "@/components/sections/WhyUs";
 import Hosts from "@/components/sections/Hosts";
 import CtaJoin from "@/components/sections/CtaJoin";
 import Social from "@/components/sections/Social";
-import Footer from "@/components/layout/Footer";
+import FooterReveal from "@/components/layout/FooterReveal";
 import WaveDivider from "@/components/ui/WaveDivider";
 
 export default function Home() {
@@ -19,8 +19,9 @@ export default function Home() {
 
       {/* Treść nasuwa się na hero: mt-[100svh] odsłania hero na starcie,
           a solidne tło (bg-ivory) + z-10 sprawiają, że przy scrollu
-          treść przykrywa przyklejony hero. Faliste WaveDividery oddzielają
-          sekcje o różnych pastelowych tłach. */}
+          treść przykrywa przyklejony hero. To samo z-10 sprawia, że stopka
+          (fixed, z-0) czeka schowana pod treścią i wynurza się dopiero
+          na samym końcu — patrz <FooterReveal />. */}
       <div className="relative z-10 mt-[100svh] bg-ivory">
         <Marquee />
         <About />
@@ -33,7 +34,7 @@ export default function Home() {
           flip
         />
 
-        <Itinerary />
+        <TripTimeline />
         <Workshops />
 
         <WhyUs />
@@ -48,8 +49,10 @@ export default function Home() {
 
         <Social />
         <CtaJoin />
-        <Footer />
       </div>
+
+      {/* Okno, w którym spod sekcji „Chcę jechać!" wynurza się stopka. */}
+      <FooterReveal />
     </main>
   );
 }

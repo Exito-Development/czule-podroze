@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { site } from "@/lib/data/site";
-import Footer from "@/components/layout/Footer";
+import FooterReveal from "@/components/layout/FooterReveal";
 
 export const metadata: Metadata = {
   title: "Regulamin sklepu",
@@ -41,7 +41,7 @@ const sections = [
 export default function RegulaminPage() {
   return (
     <main>
-      <section className="section-pad bg-ivory pb-16 pt-36">
+      <section className="section-pad relative z-10 bg-ivory pb-16 pt-36">
         <div className="mx-auto max-w-3xl">
           <h1 className="font-serif text-5xl">Regulamin sklepu</h1>
           <p className="mt-4 text-sm text-ink-soft">
@@ -61,7 +61,7 @@ export default function RegulaminPage() {
           </div>
         </div>
       </section>
-      <Footer />
+      <FooterReveal />
     </main>
   );
 }

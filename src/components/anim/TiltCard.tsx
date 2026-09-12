@@ -2,6 +2,13 @@
 
 import { useRef } from "react";
 
+type TiltCardProps = {
+  children: React.ReactNode;
+  className?: string;
+  /** Maksymalny kąt pochylenia w stopniach. */
+  max?: number;
+} & React.HTMLAttributes<HTMLDivElement>;
+
 /**
  * Efekt 3D „tilt": karta delikatnie pochyla się za kursorem (perspektywa
  * + rotateX/rotateY) i wraca na miejsce po opuszczeniu. Czysty CSS transform
@@ -11,15 +18,11 @@ export default function TiltCard({
   children,
   className,
   max = 7,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  /** Maksymalny kąt pochylenia w stopniach. */
-  max?: number;
-}) {
+  ...rest
+}: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
-  const onMove = (e: React.MouseEvent) => {
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
@@ -28,17 +31,20 @@ export default function TiltCard({
     el.style.transform = `perspective(900px) rotateX(${-py * max}deg) rotateY(${
       px * max
     }deg) translateZ(0)`;
+    rest.onMouseMove?.(e);
   };
 
-  const onLeave = () => {
+  const onLeave = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = ref.current;
     if (!el) return;
     el.style.transform =
       "perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0)";
+    rest.onMouseLeave?.(e);
   };
 
   return (
     <div
+      {...rest}
       ref={ref}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
@@ -46,6 +52,7 @@ export default function TiltCard({
       style={{
         transition: "transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
         willChange: "transform",
+        ...rest.style,
       }}
     >
       {children}

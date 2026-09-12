@@ -10,19 +10,22 @@ import { clsx } from "@/lib/clsx";
  * Dzięki temu dowolny kafelek/przycisk może go wywołać bez prop-drillingu.
  * Wysyłkę formularza podłączymy do backendu później — teraz tylko UI + walidacja.
  */
-export function openWaitlist(trip: string) {
-  window.dispatchEvent(
-    new CustomEvent("open-waitlist", { detail: { trip } })
-  );
+export interface WaitlistTarget {
+  slug: string;
+  title: string;
+}
+
+export function openWaitlist(trip: WaitlistTarget) {
+  window.dispatchEvent(new CustomEvent("open-waitlist", { detail: { trip } }));
 }
 
 export default function WaitlistModal() {
-  const [trip, setTrip] = useState<string | null>(null);
+  const [trip, setTrip] = useState<WaitlistTarget | null>(null);
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { trip: string };
+      const detail = (e as CustomEvent).detail as { trip: WaitlistTarget };
       setTrip(detail.trip);
       setSent(false);
     };
@@ -58,7 +61,7 @@ export default function WaitlistModal() {
           <>
             <h3 className="font-serif text-2xl">Lista rezerwowa</h3>
             <p className="mt-2 text-sm text-ink-soft">
-              Wyjazd <strong>{trip}</strong> nie ma już wolnych miejsc. Zostaw
+              Wyjazd <strong>{trip?.title}</strong> nie ma już wolnych miejsc. Zostaw
               kontakt — damy Ci znać, gdy zwolni się miejsce lub ruszy kolejna
               edycja.
             </p>
@@ -102,7 +105,7 @@ export default function WaitlistModal() {
             <h3 className="mt-4 font-serif text-2xl">Jesteś na liście!</h3>
             <p className="mt-2 text-sm text-ink-soft">
               Odezwiemy się, gdy tylko pojawi się miejsce na wyjazd{" "}
-              <strong>{trip}</strong>.
+              <strong>{trip?.title}</strong>.
             </p>
             <button
               onClick={close}

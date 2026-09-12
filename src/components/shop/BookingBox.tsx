@@ -36,7 +36,7 @@ export default function BookingBox({ trip }: { trip: Trip }) {
 
       {soldout ? (
         <button
-          onClick={() => openWaitlist(trip.title)}
+          onClick={() => openWaitlist(trip)}
           className="mt-6 w-full rounded-full border border-ink/20 py-4 text-sm transition-colors hover:bg-ink/5"
         >
           Zapisz się na listę rezerwową
