@@ -103,10 +103,13 @@ export default function RouteTransition() {
   // Przechwytywanie kliknięć w wewnętrzne linki.
   //
   // Słuchamy w fazie PRZECHWYTYWANIA na `document`: React (a więc i onClick
-  // z <Link>) odbiera zdarzenia w fazie bąbelkowania na kontenerze roota,
-  // więc listener bąbelkowy dostałby zdarzenie już z `defaultPrevented` —
-  // po tym, jak Next zdążył przenieść stronę bez animacji. W fazie
-  // przechwytywania jesteśmy pierwsi i możemy przejąć nawigację w całości.
+  // z <Link>) odbiera zdarzenia w fazie bąbelkowania, więc listener bąbelkowy
+  // dostałby zdarzenie już z `defaultPrevented` — po tym, jak Next zdążył
+  // przenieść stronę bez animacji.
+  //
+  // Zatrzymujemy tylko domyślną akcję, bez `stopPropagation`. <Link> pomija
+  // własną nawigację, gdy zdarzenie ma `defaultPrevented`, a własne `onClick`
+  // linków (np. zamknięcie koszyka) wciąż się wykonują.
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       if (
@@ -131,10 +134,7 @@ export default function RouteTransition() {
       if (url.origin !== window.location.origin) return;
       if (url.pathname === window.location.pathname) return;
 
-      // Przejmujemy nawigację: blokujemy domyślną akcję i nie dopuszczamy
-      // zdarzenia do handlera <Link>, żeby strona nie zmieniła się od razu.
       event.preventDefault();
-      event.stopPropagation();
       const target = `${url.pathname}${url.search}${url.hash}`;
 
       if (prefersReducedMotion()) {

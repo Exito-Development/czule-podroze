@@ -1,31 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { getTrips } from "@/lib/data/trips";
+import type { Trip } from "@/lib/data/trips";
 import { Icon } from "@/components/ui/Icon";
 
 /** Rotujące hasła nakładane na wideo (slajd ogólny + po jednym na wyjazd). */
-const trips = getTrips();
-const slides = [
-  {
-    eyebrow: "3 destynacje · 15 dni",
-    title: "Przygoda życia",
-    text: "Trzy raje, jedna czuła podróż. Słońce, warsztaty, ruch i czas tylko dla siebie.",
-    href: "#destynacje",
-    transition: undefined as { title: string; image: string } | undefined,
-  },
-  ...trips.map((t) => ({
-    eyebrow: `${t.country} · ${t.durationDays} dni`,
-    title: t.title,
-    text: t.tagline,
-    href: `/wyjazdy/${t.slug}`,
-    /* Dane dla kurtyny przejścia (RouteTransition). */
-    transition: { title: t.title, image: t.coverImage },
-  })),
-];
+interface Slide {
+  eyebrow: string;
+  title: string;
+  text: string;
+  href: string;
+  /* Dane dla kurtyny przejścia (RouteTransition). */
+  transition?: { title: string; image: string };
+}
 
-export default function Hero() {
+function buildSlides(trips: Trip[]): Slide[] {
+  return [
+    {
+      eyebrow: "3 destynacje · 15 dni",
+      title: "Przygoda życia",
+      text: "Trzy raje, jedna czuła podróż. Słońce, warsztaty, ruch i czas tylko dla siebie.",
+      href: "#destynacje",
+    },
+    ...trips.map((t) => ({
+      eyebrow: `${t.country} · ${t.durationDays} dni`,
+      title: t.title,
+      text: t.tagline,
+      href: `/wyjazdy/${t.slug}`,
+      transition: { title: t.title, image: t.coverImage },
+    })),
+  ];
+}
+
+export default function Hero({ trips }: { trips: Trip[] }) {
+  const slides = useMemo(() => buildSlides(trips), [trips]);
   const [active, setActive] = useState(0);
   const [soundOn, setSoundOn] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -38,7 +47,7 @@ export default function Hero() {
       6000
     );
     return () => clearInterval(id);
-  }, []);
+  }, [slides.length]);
 
   // Animacja treści przy zmianie slajdu.
   useEffect(() => {

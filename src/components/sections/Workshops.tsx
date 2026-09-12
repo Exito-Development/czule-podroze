@@ -28,7 +28,7 @@ export default function Workshops() {
         <div className="text-center text-ivory">
           <h2 className="text-4xl leading-tight md:text-5xl">
             <MixedTitle
-              text="Warsztaty, które *zostają z ~Tobą"
+              text="*Warsztaty, które zostają z ~Tobą"
               displayClass="font-display text-blush-soft"
               scriptClass="font-script text-blush-soft"
             />

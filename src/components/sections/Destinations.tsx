@@ -4,7 +4,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import Link from "next/link";
 import { gsap } from "gsap";
 import {
-  getTrips,
   spotsLeft,
   isSoldOut,
   formatPrice,
@@ -25,7 +24,6 @@ import { clsx } from "@/lib/clsx";
 
 type Filter = "Wszystkie" | Continent;
 
-const allTrips = getTrips();
 const filters: Filter[] = ["Wszystkie", ...continents];
 
 const statusLabel: Record<Trip["status"], { text: string; cls: string }> = {
@@ -35,17 +33,17 @@ const statusLabel: Record<Trip["status"], { text: string; cls: string }> = {
   upcoming: { text: "Wkrótce", cls: "bg-ecru text-ink-soft" },
 };
 
-function byFilter(filter: Filter): Trip[] {
+function byFilter(trips: Trip[], filter: Filter): Trip[] {
   return filter === "Wszystkie"
-    ? allTrips
-    : allTrips.filter((t) => t.continent === filter);
+    ? trips
+    : trips.filter((t) => t.continent === filter);
 }
 
 function prefersReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export default function Destinations() {
+export default function Destinations({ trips }: { trips: Trip[] }) {
   /** Filtr klikniety przez uzytkowniczke. */
   const [filter, setFilter] = useState<Filter>("Wszystkie");
   /** Filtr aktualnie wyrenderowany — zmienia sie dopiero po animacji wyjscia. */
@@ -149,7 +147,7 @@ export default function Destinations() {
     scrollToId("plan-podrozy");
   };
 
-  const visible = byFilter(rendered);
+  const visible = byFilter(trips, rendered);
 
   return (
     <section id="destynacje" className="section-pad section-y bg-cream">
@@ -271,7 +269,7 @@ export default function Destinations() {
                           </button>
                         ) : (
                           <button
-                            onClick={() => addTrip(trip)}
+                            onClick={() => void addTrip(trip)}
                             className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-sage py-3 text-sm text-ivory transition-colors hover:bg-sage-dark"
                           >
                             Chcę jechać!

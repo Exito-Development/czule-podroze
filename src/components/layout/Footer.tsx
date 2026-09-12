@@ -36,6 +36,11 @@ export default function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/rezerwacja" className="hover:text-ink">
+                Moja rezerwacja
+              </Link>
+            </li>
+            <li>
               <Link href="/faq" className="hover:text-ink">
                 FAQ
               </Link>

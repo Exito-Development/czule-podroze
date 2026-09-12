@@ -27,7 +27,8 @@ export default function CtaJoin() {
           </p>
           <h2 className="mt-4 text-5xl leading-tight md:text-6xl">
             <span className="font-serif">Chcę </span>
-            <span className="font-display text-blush-soft">jechać!</span>
+            {/* Krój display nie ma polskiego „ć" — tu pasuje odręczny. */}
+            <span className="font-script text-blush-soft">jechać!</span>
           </h2>
           <p className="mt-5 text-lg text-ivory/90">
             Zarezerwuj swoje miejsce już teraz i dołącz do naszej przygody.

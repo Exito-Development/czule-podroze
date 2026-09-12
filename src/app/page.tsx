@@ -10,12 +10,18 @@ import CtaJoin from "@/components/sections/CtaJoin";
 import Social from "@/components/sections/Social";
 import FooterReveal from "@/components/layout/FooterReveal";
 import WaveDivider from "@/components/ui/WaveDivider";
+import { fetchTrips } from "@/lib/api/trips";
 
-export default function Home() {
+/** Katalog odświeżamy co minutę — dostępność miejsc zmienia się na bieżąco. */
+export const revalidate = 60;
+
+export default async function Home() {
+  const trips = await fetchTrips();
+
   return (
     <main>
       {/* Hero jest „fixed" w tle (z-0) */}
-      <Hero />
+      <Hero trips={trips} />
 
       {/* Treść nasuwa się na hero: mt-[100svh] odsłania hero na starcie,
           a solidne tło (bg-ivory) + z-10 sprawiają, że przy scrollu
@@ -27,14 +33,14 @@ export default function Home() {
         <About />
 
         <WaveDivider bg="var(--color-ivory)" fill="var(--color-cream)" />
-        <Destinations />
+        <Destinations trips={trips} />
         <WaveDivider
           bg="var(--color-cream)"
           fill="var(--color-ivory)"
           flip
         />
 
-        <TripTimeline />
+        <TripTimeline trips={trips} />
         <Workshops />
 
         <WhyUs />

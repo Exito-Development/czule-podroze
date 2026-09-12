@@ -4,17 +4,10 @@ import { useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import {
-  getTrips,
-  getTripBySlug,
-  formatDateRange,
-  type Trip,
-} from "@/lib/data/trips";
+import { formatDateRange, type Trip } from "@/lib/data/trips";
 import { useTripFocus } from "@/components/providers/TripFocusContext";
 import { Icon } from "@/components/ui/Icon";
 import { clsx } from "@/lib/clsx";
-
-const trips = getTrips();
 
 const tagColor: Record<string, string> = {
   warsztat: "bg-blush/40 text-ink",
@@ -34,9 +27,11 @@ const tagColor: Record<string, string> = {
  * kaskadowo z naprzemiennych stron, a delfin-znacznik jedzie po linii razem
  * ze scrollem, pokazując, jak daleko jesteśmy w planie.
  */
-export default function TripTimeline() {
+export default function TripTimeline({ trips }: { trips: Trip[] }) {
   const { focusedSlug, pinnedSlug, pin, preview } = useTripFocus();
-  const trip: Trip = getTripBySlug(focusedSlug) ?? trips[0];
+  // Dopóki nikt nic nie wskazał, pokazujemy pierwszy wyjazd z oferty.
+  const trip: Trip | undefined =
+    trips.find((candidate) => candidate.slug === focusedSlug) ?? trips[0];
 
   const rootRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -131,7 +126,10 @@ export default function TripTimeline() {
     ScrollTrigger.refresh();
 
     return () => ctx.revert();
-  }, [trip.slug]);
+  }, [trip?.slug]);
+
+  // Brak oferty (np. wszystkie wyjazdy niepublikowane) — nie ma czego rysować.
+  if (!trip) return null;
 
   return (
     <section id="plan-podrozy" className="section-pad section-y bg-ivory">

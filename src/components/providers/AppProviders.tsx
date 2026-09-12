@@ -8,9 +8,6 @@ import WaitlistModal from "@/components/shop/WaitlistModal";
 import ContactPopup from "@/components/layout/ContactPopup";
 import CookieConsent from "@/components/layout/CookieConsent";
 import RouteTransition from "@/components/anim/RouteTransition";
-import { getTrips } from "@/lib/data/trips";
-
-const defaultTripSlug = getTrips()[0]?.slug ?? "";
 
 /** Spina wszystkie globalne providery i nakładki (koszyk, modale, baner cookies). */
 export default function AppProviders({
@@ -20,7 +17,7 @@ export default function AppProviders({
 }) {
   return (
     <CartProvider>
-      <TripFocusProvider initialSlug={defaultTripSlug}>
+      <TripFocusProvider initialSlug="">
         <SmoothScroll>{children}</SmoothScroll>
         <CartDrawer />
         <WaitlistModal />

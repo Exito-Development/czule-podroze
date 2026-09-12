@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import {
-  getTrips,
-  getTripBySlug,
-  formatDateRange,
-} from "@/lib/data/trips";
+import { getTrips, formatDateRange } from "@/lib/data/trips";
+import { fetchTrip } from "@/lib/api/trips";
 import BookingBox from "@/components/shop/BookingBox";
 import FooterReveal from "@/components/layout/FooterReveal";
 
+/** Odświeżanie treści wyjazdu — plan bywa zmieniany w panelu. */
+export const revalidate = 60;
+
 export function generateStaticParams() {
+  // Przy budowaniu korzystamy ze znanych wyjazdów; nowe (dodane w panelu)
+  // wygenerują się na żądanie dzięki `revalidate`.
   return getTrips().map((t) => ({ slug: t.slug }));
 }
 
@@ -18,8 +20,11 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const trip = getTripBySlug(slug);
-  return { title: trip ? trip.title : "Wyjazd" };
+  const trip = await fetchTrip(slug);
+  return {
+    title: trip ? trip.title : "Wyjazd",
+    description: trip?.tagline,
+  };
 }
 
 export default async function TripPage({
@@ -28,7 +33,7 @@ export default async function TripPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const trip = getTripBySlug(slug);
+  const trip = await fetchTrip(slug);
   if (!trip) notFound();
 
   return (
