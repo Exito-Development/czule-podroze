@@ -2,12 +2,17 @@ import Link from "next/link";
 import { site } from "@/lib/data/site";
 import { Icon } from "@/components/ui/Icon";
 
+/**
+ * Stopka.
+ *
+ * Tło musi być NIEPRZEZROCZYSTE: stopka wynurza się spod ostatniej sekcji jako
+ * element `fixed` (patrz `FooterReveal`), a pod nią stoi przyklejone wideo hero
+ * — półprzezroczyste `bg-ecru/60` przepuszczało ten obraz. `sand` to dokładnie
+ * ten sam kolor, jaki dawało `ecru/60` na tle `ivory`, tylko bez kanału alfa.
+ */
 export default function Footer() {
   return (
-    <footer
-      id="kontakt"
-      className="bg-ecru/60 text-ink"
-    >
+    <footer id="kontakt" className="bg-sand text-ink">
       <div className="section-pad grid gap-10 py-16 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex flex-col leading-none">
