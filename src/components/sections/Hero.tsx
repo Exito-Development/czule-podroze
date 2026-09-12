@@ -36,9 +36,7 @@ function buildSlides(trips: Trip[]): Slide[] {
 export default function Hero({ trips }: { trips: Trip[] }) {
   const slides = useMemo(() => buildSlides(trips), [trips]);
   const [active, setActive] = useState(0);
-  const [soundOn, setSoundOn] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Auto-przewijanie haseł.
   useEffect(() => {
@@ -60,23 +58,14 @@ export default function Hero({ trips }: { trips: Trip[] }) {
     );
   }, [active]);
 
-  // Włącznik dźwięku (szum morza z wideo). Autoplay z dźwiękiem jest blokowany,
-  // więc start jest wyciszony — pierwsze kliknięcie odblokowuje audio.
-  const toggleSound = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    if (!v.muted) v.play().catch(() => {});
-    setSoundOn(!v.muted);
-  };
-
   return (
     // Hero „przyklejony": zostaje na miejscu (fixed), a treść poniżej nasuwa
     // się na niego (patrz mt-[100svh] na owijce treści w page.tsx).
     <section className="fixed inset-0 z-0 h-[100svh] w-full overflow-hidden">
       {/* Wideo w tle (plaża + fale). Klientki podmienią plik na /media/hero.mp4 */}
+      {/* Wideo jest dekoracją i zostaje wyciszone — dźwiękiem strony steruje
+          globalny przełącznik (patrz AmbientSoundProvider). */}
       <video
-        ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
         autoPlay
         loop
@@ -142,44 +131,6 @@ export default function Hero({ trips }: { trips: Trip[] }) {
         </div>
       </div>
 
-      {/* Włącznik dźwięku */}
-      <button
-        onClick={toggleSound}
-        aria-label={soundOn ? "Wycisz" : "Włącz szum morza"}
-        className="absolute bottom-6 left-6 z-20 flex h-12 w-12 items-center justify-center rounded-full border border-ivory/40 bg-ink/30 text-ivory backdrop-blur transition-colors hover:bg-ink/50"
-      >
-        {soundOn ? (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-            <path
-              d="M5 9v6h4l5 4V5L9 9H5z"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M16 9c1 1 1 5 0 6M18.5 7c2 2 2 8 0 10"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-            />
-          </svg>
-        ) : (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-            <path
-              d="M5 9v6h4l5 4V5L9 9H5z"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M16 10l4 4M20 10l-4 4"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-            />
-          </svg>
-        )}
-      </button>
     </section>
   );
 }
