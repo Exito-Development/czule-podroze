@@ -2,14 +2,15 @@
 
 Strona i system rezerwacji kameralnych wyjazdów psychologiczno-seksuologicznych.
 
-Repozytorium zawiera dwie części:
+Repozytorium zawiera trzy aplikacje:
 
-| Katalog | Co to jest | Stos |
-| --- | --- | --- |
-| `/` (korzeń) | frontend — strona ofertowa i proces zakupu | Next.js 15 (App Router), Tailwind 4, GSAP + Lenis |
-| `api/` | backend — katalog, koszyk z blokadą miejsc, zamówienia, płatności | Java 21, Spring Boot 4.1, PostgreSQL / H2, Flyway |
+| Katalog | Co to jest | Stos | Port |
+| --- | --- | --- | --- |
+| `/` (korzeń) | strona ofertowa i proces zakupu | Next.js 15, Tailwind 4, GSAP + Lenis | 3002 |
+| `api/` | backend: katalog, koszyk z blokadą miejsc, zamówienia, płatności, wiadomości | Java 21, Spring Boot 4.1, PostgreSQL / H2 | 8080 |
+| `admin/` | panel organizatorek: oferta, zamówienia, uczestniczki, wysyłki | Next.js 15, Tailwind 4 | 3003 |
 
-Szczegóły backendu: [`api/README.md`](api/README.md).
+Szczegóły: [`api/README.md`](api/README.md) · [`admin/README.md`](admin/README.md).
 
 ## Uruchomienie
 
@@ -17,10 +18,16 @@ Szczegóły backendu: [`api/README.md`](api/README.md).
 # 1. Backend (osobny terminal) — działa bez żadnej infrastruktury
 cd api && mvn spring-boot:run
 
-# 2. Frontend
+# 2. Strona
 npm install
 npm run dev            # http://localhost:3002
+
+# 3. Panel organizatorek (opcjonalnie, osobny terminal)
+cd admin && npm install && npm run dev    # http://localhost:3003
 ```
+
+Do panelu logujesz się kontem zakładanym przy pierwszym starcie API:
+`admin@czulapodroz.pl` / `CzulaPodroz2026!`.
 
 Frontend znajduje API pod `http://localhost:8080`. Inny adres podaje się przez
 `NEXT_PUBLIC_API_URL` — patrz [`.env.example`](.env.example).
@@ -110,6 +117,8 @@ w kolejce.
 ## Przed go-live
 
 - Podłączenie prawdziwego operatora płatności (patrz `api/README.md`).
-- Wysyłka e-maili z potwierdzeniem rezerwacji.
-- Panel administracyjny w UI — API (`/api/v1/admin/**`) jest gotowe.
+- Ustawienie wysyłki SMTP (`czula.messaging.provider=smtp`) — bez tego
+  wiadomości z panelu trafiają tylko do logu.
+- Automatyczny e-mail z potwierdzeniem rezerwacji po opłaceniu.
 - Domena, HTTPS, `CORS_ALLOWED_ORIGINS` i `JWT_SECRET` ze zmiennych środowiskowych.
+- Panel za osobną subdomeną i dodatkową warstwą ograniczenia dostępu.

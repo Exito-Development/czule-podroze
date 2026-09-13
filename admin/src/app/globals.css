@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────
+   Panel organizatorek — te same kolory marki, ale gęściej
+   i bardziej użytkowo niż na stronie sprzedażowej.
+   ────────────────────────────────────────────────────────── */
+@theme {
+  --color-ivory: #faf6ef;
+  --color-cream: #f4ede1;
+  --color-sand: #e9dcc8;
+  --color-ecru: #ddcbb0;
+  --color-sage: #9aa886;
+  --color-sage-dark: #76856a;
+  --color-sage-pale: #eaeee2;
+  --color-blush: #e9b9bb;
+  --color-blush-pale: #f9ecec;
+  --color-ink: #3a342c;
+  --color-ink-soft: #6b6356;
+  --color-ink-faint: #9a9184;
+  --color-danger: #b4564f;
+  --color-danger-pale: #f8e9e7;
+  --color-surface: #ffffff;
+
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+}
+
+html {
+  background-color: var(--color-ivory);
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Tabele panelu: jeden rytm dla wszystkich widoków. */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.admin-table thead th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--color-ink-soft);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgb(58 52 44 / 0.1);
+  white-space: nowrap;
+}
+.admin-table tbody td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgb(58 52 44 / 0.06);
+  vertical-align: middle;
+}
+.admin-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.admin-table tbody tr:hover {
+  background: rgb(154 168 134 / 0.06);
+}
+
+/* Pola formularzy */
+.field-label {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--color-ink-soft);
+  margin-bottom: 0.3rem;
+}
+.field-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(58 52 44 / 0.15);
+  background: var(--color-surface);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.field-input:focus {
+  border-color: var(--color-sage);
+}
+.field-input:disabled {
+  background: var(--color-cream);
+  color: var(--color-ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

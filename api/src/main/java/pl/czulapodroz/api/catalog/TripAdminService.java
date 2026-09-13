@@ -69,7 +69,12 @@ public class TripAdminService {
                         request.deposit(),
                         request.capacity(),
                         request.coverImage());
-        apply(trip, request);
+        // Przy tworzeniu brak sekcji znaczy „pusta" — nie ma czego zachowywać.
+        trip.replaceIncluded(request.included() == null ? List.of() : request.included());
+        trip.replaceDestinations(toDestinations(request.destinations()));
+        trip.replaceItinerary(
+                request.itinerary() == null ? List.of() : toDays(request.itinerary()));
+
         Trip saved = tripRepository.save(trip);
         return tripMapper.toResponse(saved, seatAvailabilityService.availabilityFor(saved));
     }
@@ -96,7 +101,20 @@ public class TripAdminService {
         } catch (IllegalArgumentException exception) {
             throw new ConflictException("trip.capacityTooLow", exception.getMessage());
         }
-        apply(trip, request);
+        // Sekcje pominięte w żądaniu zostają nietknięte.
+        //
+        // Panel edytuje dane wyjazdu, plan dzień po dniu i destynacje w osobnych
+        // widokach — gdyby brak sekcji znaczył „wyczyść", zapisanie samej ceny
+        // kasowałoby cały plan podróży.
+        if (request.included() != null) {
+            trip.replaceIncluded(request.included());
+        }
+        if (request.destinations() != null) {
+            trip.replaceDestinations(toDestinations(request.destinations()));
+        }
+        if (request.itinerary() != null) {
+            trip.replaceItinerary(toDays(request.itinerary()));
+        }
         return tripMapper.toResponse(trip, seatAvailabilityService.availabilityFor(trip));
     }
 
@@ -120,23 +138,21 @@ public class TripAdminService {
         tripRepository.delete(trip);
     }
 
-    private void apply(Trip trip, TripUpsertRequest request) {
-        trip.replaceIncluded(request.included() == null ? List.of() : request.included());
-        trip.replaceDestinations(
-                request.destinations() == null
-                        ? List.of()
-                        : request.destinations().stream()
-                                .map(
-                                        destination ->
-                                                new TripDestination(
-                                                        destination.position(),
-                                                        destination.name(),
-                                                        destination.dayRange(),
-                                                        destination.description(),
-                                                        destination.image()))
-                                .toList());
-        trip.replaceItinerary(
-                request.itinerary() == null ? List.of() : toDays(request.itinerary()));
+    private List<TripDestination> toDestinations(
+            List<TripUpsertRequest.DestinationRequest> destinations) {
+        if (destinations == null) {
+            return List.of();
+        }
+        return destinations.stream()
+                .map(
+                        destination ->
+                                new TripDestination(
+                                        destination.position(),
+                                        destination.name(),
+                                        destination.dayRange(),
+                                        destination.description(),
+                                        destination.image()))
+                .toList();
     }
 
     private List<TripDay> toDays(List<TripUpsertRequest.DayRequest> days) {
