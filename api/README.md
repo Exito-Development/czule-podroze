@@ -234,9 +234,10 @@ Bez `MaxRAM` procent liczy się od pamięci, którą maszyna *widzi* — na hoś
 z 15 GB daje to ~10 GB sterty. JVM z takim zapasem nie sprząta agresywnie,
 tylko rośnie, a wraz z nią rachunek. Z sufitem sterta kończy się na 384 MB.
 
-Zmierzone pod obciążeniem (200 równoległych żądań + zadania cykliczne):
-**~406 MB RSS**, zero `OutOfMemory`. Przy większym ruchu podnieś przez zmienną
-`JAVA_OPTS`, np. `-XX:MaxRAM=1g`.
+Zmierzone: **392 MB RSS** po starcie, **411 MB** po 500 żądaniach (50
+równolegle), a po kolejnych 150 s pracy zadań cyklicznych **411 MB** — czyli
+bez dalszego wzrostu. Zero `OutOfMemory`, health `UP`. Przy większym ruchu
+podnieś przez zmienną `JAVA_OPTS`, np. `-XX:MaxRAM=1g`.
 
 Drugi składnik rachunku to baza — trzymaj ją w tym samym projekcie, wtedy ruch
 między usługami idzie po sieci wewnętrznej i nie liczy się jako transfer.

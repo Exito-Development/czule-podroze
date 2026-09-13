@@ -22,8 +22,8 @@ EXPOSE 8080
 # pamięć rośnie razem z nią rachunek. MaxRAM ogranicza to, co JVM uznaje za
 # dostępną pamięć, więc sterta kończy się na 384 MB.
 #
-# Aplikacja mieści się w tym z zapasem (zmierzone ~420 MB RSS przy stercie
-# 256 MB). Przy większym ruchu podnieś przez zmienną środowiskową JAVA_OPTS,
-# np. -XX:MaxRAM=1g.
+# Aplikacja mieści się w tym z zapasem: zmierzone 392 MB RSS po starcie
+# i 411 MB po 500 żądaniach, bez dalszego wzrostu. Przy większym ruchu
+# podnieś przez zmienną środowiskową JAVA_OPTS, np. -XX:MaxRAM=1g.
 ENV JAVA_OPTS="-XX:MaxRAM=512m -XX:MaxRAMPercentage=75"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
