@@ -114,6 +114,53 @@ w kolejce.
 - Finalne opisy wyjazdów, ceny, terminy (do wprowadzenia przez API/panel).
 - Treść regulaminu i polityki prywatności.
 
+## SEO
+
+### Co jest w kodzie
+
+| Element | Gdzie | Po co |
+| --- | --- | --- |
+| Adres witryny | `NEXT_PUBLIC_SITE_URL`, `src/lib/seo.ts` | Źródło wszystkich adresów absolutnych |
+| Adresy kanoniczne | `alternates.canonical` na każdej stronie | Ucinają duplikaty (`/`, `/?utm_source=…`) |
+| Mapa strony | `src/app/sitemap.ts` | Wyjazdy ciągnie z API — nowa oferta trafia tam sama |
+| Reguły robotów | `src/app/robots.ts` | Wpuszcza treść, blokuje koszyk i rezerwacje |
+| Dane strukturalne | `src/lib/schema.ts` | Cena, termin i dostępność w wyniku wyszukiwania |
+| Podgląd linku | `src/app/opengraph-image.tsx` (+ wersja dla wyjazdu) | Obrazek przy wklejeniu linku |
+| Ikona, manifest | `src/app/icon.tsx`, `src/app/manifest.ts` | Karta przeglądarki, dodanie do ekranu głównego |
+
+Panel admina (`admin/`) ma własny `robots.ts` blokujący wszystko oraz
+`noindex` w metadanych — nie ma go w wynikach wyszukiwania.
+
+**Adres witryny trzeba ustawić w środowisku.** Domyślny to
+`https://czulapodroz.pl`; środowisko testowe musi mieć własny, inaczej Google
+zindeksuje testy jako produkcję.
+
+### Czego kod nie załatwi
+
+Sama strona nie sprawi, że pojawisz się w Google. Po wdrożeniu:
+
+1. **Google Search Console** — dodaj domenę (<https://search.google.com/search-console>),
+   potwierdź własność wpisem DNS, wyślij `https://czulapodroz.pl/sitemap.xml`.
+   Bez tego czekasz, aż Google znajdzie stronę sam; z tym trwa to dni, nie tygodnie.
+2. **Profil Firmy w Google** — dla fraz typu „wyjazdy dla kobiet" z okolicy.
+3. **Linki z zewnątrz** — Instagram, Facebook, katalogi wyjazdów, wywiady.
+   To najmocniejszy czynnik, na jaki masz wpływ, i jedyny, którego nie da się
+   zrobić w kodzie.
+4. **Treść** — strona ma dziś trzy wyjazdy i FAQ. Google potrzebuje tekstu,
+   żeby mieć co pokazać. Blog albo rozbudowane opisy warsztatów dają frazy,
+   pod którymi ktoś faktycznie szuka („wyjazd po rozstaniu", „retreat dla
+   kobiet Zanzibar").
+
+### Sprawdzenie po wdrożeniu
+
+```bash
+curl -s https://czulapodroz.pl/robots.txt
+curl -s https://czulapodroz.pl/sitemap.xml
+```
+
+Dane strukturalne: <https://search.google.com/test/rich-results>.
+Podgląd linku: <https://www.opengraph.xyz/>.
+
 ## Przed go-live
 
 - Podłączenie prawdziwego operatora płatności (patrz `api/README.md`).
@@ -122,3 +169,5 @@ w kolejce.
 - Automatyczny e-mail z potwierdzeniem rezerwacji po opłaceniu.
 - Domena, HTTPS, `CORS_ALLOWED_ORIGINS` i `JWT_SECRET` ze zmiennych środowiskowych.
 - Panel za osobną subdomeną i dodatkową warstwą ograniczenia dostępu.
+- `NEXT_PUBLIC_SITE_URL` ustawione na prawdziwą domenę, a strona zgłoszona
+  w Google Search Console (patrz „SEO" wyżej).

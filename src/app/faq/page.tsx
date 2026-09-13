@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
 import { faqItems } from "@/lib/data/faq";
 import FooterReveal from "@/components/layout/FooterReveal";
+import JsonLd from "@/components/seo/JsonLd";
+import { faqSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
-  title: "FAQ",
-  description: "Najczęściej zadawane pytania o wyjazdy Czułej Podróży.",
+  title: "FAQ — pytania o wyjazdy dla kobiet",
+  description:
+    "Dla kogo są wyjazdy, jak wygląda rezerwacja i płatność, co jest w cenie, " +
+    "czy można jechać samej — odpowiedzi na najczęstsze pytania o Czułą Podróż.",
+  alternates: { canonical: "/faq" },
+  openGraph: { url: "/faq" },
 };
 
 export default function FaqPage() {
   return (
     <main>
+      {/* Pary pytanie–odpowiedź, które Google potrafi rozwinąć w wyniku. */}
+      <JsonLd data={faqSchema(faqItems)} />
       <section className="section-pad relative z-10 bg-ivory pb-16 pt-36">
         <div className="mx-auto max-w-3xl">
           <p className="text-sm uppercase tracking-[0.3em] text-sage-dark">

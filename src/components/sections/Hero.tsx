@@ -90,12 +90,22 @@ export default function Hero({ trips }: { trips: Trip[] }) {
           >
             {slides[active].eyebrow}
           </p>
-          <h1
+          {/*
+            Widoczne hasło zmienia się z każdym slajdem, więc nie nadaje się na
+            nagłówek strony — robot indeksujący zobaczyłby losowe „Przygoda
+            życia" zamiast informacji, czym jest ta witryna. Nagłówek h1 jest
+            więc stały i opisowy, a hasło slajdu zostaje dokładnie takie samo,
+            tylko przestaje być nagłówkiem.
+          */}
+          <h1 className="sr-only">
+            Czuła Podróż — wyjazdy psychologiczno-seksuologiczne dla kobiet
+          </h1>
+          <p
             data-anim
             className="mt-4 font-serif text-5xl leading-[1.05] sm:text-6xl md:text-7xl"
           >
             {slides[active].title}
-          </h1>
+          </p>
           <p data-anim className="mt-5 max-w-md text-base text-ivory/90">
             {slides[active].text}
           </p>

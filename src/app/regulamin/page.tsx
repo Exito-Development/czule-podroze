@@ -5,6 +5,8 @@ import FooterReveal from "@/components/layout/FooterReveal";
 export const metadata: Metadata = {
   title: "Regulamin sklepu",
   description: "Regulamin sprzedaży wyjazdów Czułej Podróży.",
+  alternates: { canonical: "/regulamin" },
+  openGraph: { url: "/regulamin" },
 };
 
 /**

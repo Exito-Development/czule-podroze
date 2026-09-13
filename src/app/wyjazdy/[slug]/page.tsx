@@ -4,6 +4,8 @@ import { getTrips, formatDateRange } from "@/lib/data/trips";
 import { fetchTrip } from "@/lib/api/trips";
 import BookingBox from "@/components/shop/BookingBox";
 import FooterReveal from "@/components/layout/FooterReveal";
+import JsonLd from "@/components/seo/JsonLd";
+import { tripSchema, breadcrumbSchema } from "@/lib/schema";
 
 /** Odświeżanie treści wyjazdu — plan bywa zmieniany w panelu. */
 export const revalidate = 60;
@@ -21,9 +23,38 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const trip = await fetchTrip(slug);
+  if (!trip) return { title: "Wyjazd" };
+
+  // Opis w wyniku wyszukiwania: samo hasło wyjazdu to za mało, żeby ktoś
+  // kliknął. Dokładamy to, o co ludzie realnie pytają — kraj, długość, termin.
+  //
+  // Kraj podajemy po dwukropku, w mianowniku. Wstawiony w zdanie wymagałby
+  // odmiany przez przypadki („do Portugalii", ale „do Tanzanii"), a nazwy
+  // pochodzą z panelu i nie da się ich odmienić automatycznie.
+  const description =
+    `${trip.tagline} ${trip.durationDays}-dniowy wyjazd dla kobiet — warsztaty ` +
+    `psychologiczne, joga i kameralna grupa. Kierunek: ${trip.country}. ` +
+    `Termin: ${formatDateRange(trip.startDate, trip.endDate)}.`;
+
+  // Dla części wyjazdów nazwa jest po prostu nazwą kraju (Portugalia), więc
+  // doklejanie kraju dałoby „Portugalia — wyjazd dla kobiet, Portugalia".
+  const title =
+    trip.country.toLowerCase() === trip.title.toLowerCase()
+      ? `${trip.title} — wyjazd dla kobiet z warsztatami`
+      : `${trip.title} — wyjazd dla kobiet, ${trip.country}`;
+
   return {
-    title: trip ? trip.title : "Wyjazd",
-    description: trip?.tagline,
+    title,
+    description,
+    alternates: { canonical: `/wyjazdy/${trip.slug}` },
+    openGraph: {
+      title: `${trip.title} — ${trip.tagline}`,
+      description,
+      url: `/wyjazdy/${trip.slug}`,
+      type: "article",
+      locale: "pl_PL",
+    },
+    twitter: { card: "summary_large_image", title: trip.title, description },
   };
 }
 
@@ -38,6 +69,15 @@ export default async function TripPage({
 
   return (
     <main>
+      {/* Oferta w formacie, który Google potrafi pokazać z ceną i terminem. */}
+      <JsonLd data={tripSchema(trip)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Strona główna", path: "/" },
+          { name: trip.title, path: `/wyjazdy/${trip.slug}` },
+        ])}
+      />
+
       {/* Hero wyjazdu */}
       <section className="relative z-10 h-[60vh] min-h-[420px] w-full overflow-hidden bg-ink">
         {/* eslint-disable-next-line @next/next/no-img-element */}
