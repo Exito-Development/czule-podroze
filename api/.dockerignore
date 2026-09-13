@@ -1,0 +1,23 @@
+# Kontekst budowania jest wysyłany do usługi budującej przy KAŻDYM wdrożeniu,
+# więc wszystko, czego nie potrzebuje Dockerfile, tylko wydłuża deploy.
+# Sam `target/` to 74 MB, a `.data/` to lokalna baza H2 — nie ma powodu,
+# żeby którekolwiek z nich opuszczało twój komputer.
+
+target/
+.data/
+.data-*/
+*.log
+
+.git/
+.gitignore
+
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Dokumentacja i konfiguracja narzędzi nie biorą udziału w budowaniu obrazu.
+README.md
+docker-compose.yml
+railway.json
+tools/

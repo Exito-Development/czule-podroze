@@ -195,9 +195,38 @@ schemat.
 
 ## Wdrożenie na Railway
 
-W repozytorium jest `railway.json` — Railway sam wykryje `Dockerfile`, ustawi
-health-check na `/actuator/health` i politykę restartów. Katalog główny usługi
-ustaw na `api`.
+W repozytorium są dwa pliki, które mówią Railwayowi, jak budować i wdrażać:
+
+| Plik | Rola |
+| --- | --- |
+| `railway.json` | builder, health-check, polityka restartów, ścieżki wyzwalające |
+| `.dockerignore` | co NIE ma iść do usługi budującej |
+
+**Katalog główny usługi ustaw na `api`** (Settings → Source → Root Directory) —
+stamtąd Railway czyta `railway.json`.
+
+### Co robi `railway.json`
+
+- `builder: DOCKERFILE` — budujemy z `Dockerfile`, bez zgadywania przez Nixpacks.
+- `healthcheckPath: /actuator/health` — Railway przełączy ruch na nową wersję
+  dopiero, gdy aplikacja odpowie, że wstała. Limit 300 s z zapasem na zimny
+  start JVM i migracje Liquibase.
+- `restartPolicyType: ON_FAILURE`, 3 próby — restart po awarii, ale bez
+  zapętlania się w nieskończoność, gdy błąd jest w konfiguracji.
+- `watchPatterns: ["api/**"]` — **oszczędza pieniądze**. To monorepo: bez tego
+  każdy commit we frontendzie albo w panelu przebudowywałby również API, a
+  Railway liczy za czas budowania.
+
+> Jeśli po wypchnięciu zmian w `api/` nic się nie wdraża, a w logu widnieje
+> „No changed files matched patterns", to znaczy, że wzorzec jest liczony
+> względem katalogu usługi, nie repozytorium. Zamień wtedy `"api/**"` na `"**"`.
+
+### Co robi `.dockerignore`
+
+Kontekst budowania leci do Railwaya przy każdym wdrożeniu. Bez filtra byłoby to
+76 MB — w tym `target/` (74 MB) i `.data/`, czyli twoja lokalna baza H2.
+Z filtrem zostaje **1,2 MB**. Sprawdzone: z tak okrojonego kontekstu `mvn
+package` przechodzi, więc nic potrzebnego nie zostało odcięte.
 
 ### Zmienne środowiskowe
 
