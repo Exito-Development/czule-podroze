@@ -48,6 +48,11 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
+    <!-- Wysyłka wiadomości do uczestniczek (profil SMTP). -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
 
     <!-- Spring Boot 4 wydzielił autokonfiguracje do osobnych modułów:
          samo flyway-core nie uruchomi migracji przy starcie. -->

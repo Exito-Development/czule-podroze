@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.czulapodroz.api.catalog.TripRepository;
 import pl.czulapodroz.api.catalog.domain.Trip;
+import pl.czulapodroz.api.common.error.ConflictException;
 import pl.czulapodroz.api.common.error.NotFoundException;
 import pl.czulapodroz.api.inventory.SeatAvailabilityService;
 import pl.czulapodroz.api.order.domain.OrderStatus;
@@ -30,16 +32,19 @@ public class OrderPaymentService {
     private final OrderRepository orderRepository;
     private final TripRepository tripRepository;
     private final SeatAvailabilityService seatAvailabilityService;
+    private final ApplicationEventPublisher events;
     private final Clock clock;
 
     public OrderPaymentService(
             OrderRepository orderRepository,
             TripRepository tripRepository,
             SeatAvailabilityService seatAvailabilityService,
+            ApplicationEventPublisher events,
             Clock clock) {
         this.orderRepository = orderRepository;
         this.tripRepository = tripRepository;
         this.seatAvailabilityService = seatAvailabilityService;
+        this.events = events;
         this.clock = clock;
     }
 
@@ -81,6 +86,36 @@ public class OrderPaymentService {
 
         orderRepository.save(order);
         log.info("Zamówienie {} opłacone — miejsca przyznane", order.getOrderNumber());
+
+        // Lista uczestniczek buduje się z tego zdarzenia — patrz moduł `participants`.
+        events.publishEvent(new OrderConfirmedEvent(order.getId(), order.getOrderNumber()));
+    }
+
+    /**
+     * Ręczne zaksięgowanie wpłaty przez organizatorki (np. przelew tradycyjny).
+     *
+     * Ta sama ścieżka co przy płatności online: miejsca zostają przyznane,
+     * a lista uczestniczek uzupełniona.
+     */
+    @Transactional
+    public void recordOfflinePayment(String orderNumber, BigDecimal amount) {
+        TripOrder order =
+                orderRepository
+                        .findByOrderNumber(orderNumber)
+                        .orElseThrow(
+                                () ->
+                                        new NotFoundException(
+                                                "order.notFound", "Nie znaleziono zamówienia"));
+        if (order.isPaid()) {
+            throw new ConflictException(
+                    "order.alreadyPaid", "To zamówienie jest już opłacone");
+        }
+        if (!order.awaitsPayment()) {
+            throw new ConflictException(
+                    "order.notPayable",
+                    "Zamówienie nie oczekuje na płatność (status: %s)".formatted(order.getStatus()));
+        }
+        confirmPayment(order.getId(), amount == null ? order.getAmountDueNow() : amount);
     }
 
     /** Zamówienia, których nie opłacono w wyznaczonym czasie. */

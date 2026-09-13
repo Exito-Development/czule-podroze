@@ -60,6 +60,12 @@ czula:
     max-seats-per-item: 4
     expiry-scan-interval: PT1M
     unpaid-scan-interval: PT5M
+  messaging:
+    # `log` — wiadomości trafiają do logu (środowisko lokalne i testy).
+    # `smtp` — prawdziwa wysyłka; dane serwera w `spring.mail.*`.
+    provider: ${MESSAGING_PROVIDER:log}
+    from-name: Czuła Podróż
+    from-email: ${MESSAGING_FROM_EMAIL:kontakt@czulapodroz.pl}
   payments:
     provider: ${PAYMENTS_PROVIDER:mock}
     api-base-url: ${API_BASE_URL:http://localhost:8080}

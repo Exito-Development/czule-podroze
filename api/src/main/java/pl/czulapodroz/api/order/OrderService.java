@@ -131,6 +131,18 @@ public class OrderService {
                                         "order.notFound", "Nie znaleziono zamówienia " + orderNumber));
     }
 
+    /**
+     * Szczegóły zamówienia dla panelu.
+     *
+     * Mapowanie MUSI dziać się tutaj, wewnątrz transakcji: `open-in-view` jest
+     * wyłączony, więc encja oddana kontrolerowi ma już zamkniętą sesję i jej
+     * leniwe kolekcje (pozycje zamówienia) nie dałyby się odczytać.
+     */
+    @Transactional(readOnly = true)
+    public OrderDtos.OrderResponse detail(String orderNumber) {
+        return orderMapper.toResponse(requireByNumber(orderNumber));
+    }
+
     @Transactional(readOnly = true)
     public List<OrderDtos.OrderResponse> listForUser(UUID userId) {
         return orderRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
