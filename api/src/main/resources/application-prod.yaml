@@ -14,6 +14,16 @@ spring:
 czula:
   payments:
     provider: ${PAYMENTS_PROVIDER:mock}
+  admin:
+    # Konto organizatorki zakładane przy pierwszym starcie, jeśli jeszcze nie
+    # istnieje. Bez tego po wdrożeniu nie ma się czym zalogować do panelu,
+    # więc nie da się dodać żadnego wyjazdu i katalog zostaje pusty.
+    #
+    # Świadomie BEZ wartości domyślnych: konto z hasłem wpisanym w repozytorium
+    # byłoby gotowym wejściem do panelu dla każdego, kto zna ten kod. Gdy
+    # zmienne nie są ustawione, konto po prostu nie powstaje.
+    bootstrap-email: ${ADMIN_EMAIL:}
+    bootstrap-password: ${ADMIN_PASSWORD:}
 
 logging:
   level:

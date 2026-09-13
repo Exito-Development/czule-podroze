@@ -138,7 +138,7 @@ lokalnie. Podłączenie Przelewów24 albo Stripe'a to nowa implementacja
 | `CORS_ALLOWED_ORIGINS` | dozwolone źródła przeglądarki, po przecinku |
 | `PAYMENTS_PROVIDER` | `mock` albo docelowy operator |
 | `PAYMENTS_WEBHOOK_SECRET` | sekret powiadomień operatora |
-| `ADMIN_PASSWORD` | hasło startowe konta organizatorki |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | konto organizatorki zakładane przy pierwszym starcie — w profilu `prod` trzeba podać OBA, inaczej konto nie powstanie |
 | `LIQUIBASE_CONTEXTS` | konteksty migracji, domyślnie `prod` (bez danych przykładowych) |
 
 Parametry rezerwacji (`czula.booking.*`): czas blokady w koszyku, okno
@@ -236,6 +236,7 @@ DATABASE_URL      = jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/
 DATABASE_USER     = ${{Postgres.PGUSER}}
 DATABASE_PASSWORD = ${{Postgres.PGPASSWORD}}
 JWT_SECRET        = <openssl rand -base64 48>
+ADMIN_EMAIL       = admin@czulapodroz.pl
 ADMIN_PASSWORD    = <hasło startowe organizatorki>
 FRONTEND_BASE_URL = https://czulapodroz.pl
 API_BASE_URL      = https://api.czulapodroz.pl
@@ -250,6 +251,43 @@ podajemy oddzielnie.
 
 `PORT` wstrzykuje Railway — nie ustawiaj go ręcznie (aplikacja czyta
 `${PORT:8080}`).
+
+### Baza danych
+
+**Bazy nie wdraża się z repozytorium.** `docker-compose.yml` w tym katalogu
+służy wyłącznie do pracy lokalnej — na Railwayu PostgreSQL dodajesz jako
+osobną usługę: **+ New → Database → PostgreSQL**, w tym samym projekcie co API.
+
+Trzymanie jej w tym samym projekcie ma znaczenie: ruch idzie wtedy po sieci
+wewnętrznej i nie liczy się jako transfer.
+
+**Schematu też nie zakładasz ręcznie.** Przy pierwszym starcie API Liquibase
+wykonuje 17 changesetów i tworzy komplet tabel. Kolejne starty nie robią nic —
+sprawdzone na PostgreSQL-u 16: drugie uruchomienie wykonało 0 changesetów.
+
+Typy abstrakcyjne z changelogów mapują się na natywne typy PostgreSQL-a
+(`uuid`, `timestamp with time zone`, `numeric`, `date`), a `ddl-auto: validate`
+przy starcie potwierdza, że encje zgadzają się ze schematem.
+
+#### Konto do panelu
+
+`ADMIN_EMAIL` **i** `ADMIN_PASSWORD` muszą być ustawione oba. Konto
+organizatorki powstaje przy pierwszym starcie i bez niego nie ma się czym
+zalogować do panelu — a więc nie da się dodać żadnego wyjazdu i katalog
+zostaje pusty. Profil `prod` celowo nie ma tu wartości domyślnych: konto
+z hasłem wpisanym w repozytorium byłoby gotowym wejściem dla każdego, kto zna
+ten kod.
+
+#### Kopie zapasowe
+
+Railway robi migawki bazy, ale włącz je świadomie w ustawieniach usługi
+PostgreSQL i sprawdź częstotliwość. Zrzut na własny dysk:
+
+```bash
+pg_dump "postgresql://user:hasło@host:port/baza" > czula-$(date +%F).sql
+```
+
+Dane połączenia znajdziesz w usłudze bazy, w zakładce Variables.
 
 ### Zużycie pamięci a rachunek
 
