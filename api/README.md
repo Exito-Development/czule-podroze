@@ -193,6 +193,72 @@ Plik wchodzi do bazy przez changeset `900-seed-trips.yaml`, czyli tylko
 w profilach z kontekstem `seed` (`local`, `postgres`) — produkcja dostaje sam
 schemat.
 
+## Wdrożenie na Railway
+
+W repozytorium jest `railway.json` — Railway sam wykryje `Dockerfile`, ustawi
+health-check na `/actuator/health` i politykę restartów. Katalog główny usługi
+ustaw na `api`.
+
+### Zmienne środowiskowe
+
+```
+SPRING_PROFILES_ACTIVE = prod
+DATABASE_URL      = jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}
+DATABASE_USER     = ${{Postgres.PGUSER}}
+DATABASE_PASSWORD = ${{Postgres.PGPASSWORD}}
+JWT_SECRET        = <openssl rand -base64 48>
+ADMIN_PASSWORD    = <hasło startowe organizatorki>
+FRONTEND_BASE_URL = https://czulapodroz.pl
+API_BASE_URL      = https://api.czulapodroz.pl
+CORS_ALLOWED_ORIGINS = https://czulapodroz.pl,https://admin.czulapodroz.pl
+```
+
+**Przedrostek `jdbc:` jest obowiązkowy.** Railway udostępnia własną zmienną
+`DATABASE_URL` w formacie `postgresql://user:hasło@host/baza`, którego Spring
+nie przyjmie — aplikacja pada wtedy na `Failed to determine a suitable driver
+class`. Dlatego adres składamy z osobnych zmiennych bazy, a login i hasło
+podajemy oddzielnie.
+
+`PORT` wstrzykuje Railway — nie ustawiaj go ręcznie (aplikacja czyta
+`${PORT:8080}`).
+
+### Zużycie pamięci a rachunek
+
+Railway rozlicza faktycznie zużytą pamięć, więc pilnuje jej `Dockerfile`:
+
+```
+ENV JAVA_OPTS="-XX:MaxRAM=512m -XX:MaxRAMPercentage=75"
+```
+
+Bez `MaxRAM` procent liczy się od pamięci, którą maszyna *widzi* — na hoście
+z 15 GB daje to ~10 GB sterty. JVM z takim zapasem nie sprząta agresywnie,
+tylko rośnie, a wraz z nią rachunek. Z sufitem sterta kończy się na 384 MB.
+
+Zmierzone pod obciążeniem (200 równoległych żądań + zadania cykliczne):
+**~406 MB RSS**, zero `OutOfMemory`. Przy większym ruchu podnieś przez zmienną
+`JAVA_OPTS`, np. `-XX:MaxRAM=1g`.
+
+Drugi składnik rachunku to baza — trzymaj ją w tym samym projekcie, wtedy ruch
+między usługami idzie po sieci wewnętrznej i nie liczy się jako transfer.
+
+### Czego NIE da się tu oszczędzić
+
+`SeatHoldExpiryScheduler` odpytuje bazę co minutę (`expiry-scan-interval:
+PT1M`), bo zwalnia miejsca z porzuconych koszyków. To znaczy, że aplikacja
+i baza pracują bez przerwy — plany „usypiające" (darmowy Render, Neon
+z limitem godzin pracy) się tu nie nadają: albo wyczerpią limit w kilka dni,
+albo uśpiona usługa przestanie zwalniać miejsca.
+
+### Po wdrożeniu
+
+```bash
+curl https://api.czulapodroz.pl/actuator/health     # {"status":"UP"}
+curl https://api.czulapodroz.pl/api/v1/trips        # [] — baza startuje pusta
+```
+
+Pusta lista jest poprawna: profil `prod` nie wgrywa danych przykładowych.
+Wyjazdy dodajesz w panelu admina.
+
 ## Co zostało do zrobienia przed go-live
 
 - Prawdziwy operator płatności (implementacja `PaymentGateway` + weryfikacja

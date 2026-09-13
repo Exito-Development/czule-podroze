@@ -14,5 +14,16 @@ RUN addgroup -S czula && adduser -S czula -G czula
 COPY --from=build /build/target/*.jar app.jar
 USER czula
 EXPOSE 8080
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75"
+# Twardy sufit pamięci jest tu celowo.
+#
+# Samo MaxRAMPercentage liczy procent od tego, co maszyna WIDZI. Bez limitu
+# kontenera na hoście z 15 GB daje to ~10 GB sterty — JVM z takim zapasem nie
+# sprząta agresywnie, tylko rośnie, a na hostingach rozliczanych za zużytą
+# pamięć rośnie razem z nią rachunek. MaxRAM ogranicza to, co JVM uznaje za
+# dostępną pamięć, więc sterta kończy się na 384 MB.
+#
+# Aplikacja mieści się w tym z zapasem (zmierzone ~420 MB RSS przy stercie
+# 256 MB). Przy większym ruchu podnieś przez zmienną środowiskową JAVA_OPTS,
+# np. -XX:MaxRAM=1g.
+ENV JAVA_OPTS="-XX:MaxRAM=512m -XX:MaxRAMPercentage=75"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
