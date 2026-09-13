@@ -24,6 +24,22 @@ organizatorki `admin@czulapodroz.pl` / `CzulaPodroz2026!`.
 - Dokumentacja: <http://localhost:8080/swagger-ui.html>
 - Health: <http://localhost:8080/actuator/health>
 
+> **Pierwsze uruchomienie po przejściu z Flywaya — skasuj `api/.data`.**
+>
+> ```bash
+> rm -rf api/.data && cd api && ./mvnw clean package
+> ```
+>
+> Stara baza lokalna była zakładana z `DATABASE_TO_LOWER=TRUE`, więc ma schemat
+> zapisany małymi literami (`public`). Nowy adres tej flagi nie ustawia i H2 nie
+> otworzy takiego pliku — wywala się już przy wczytywaniu, na odtwarzaniu
+> własnych metadanych:
+> `Schema "public" not found ... CREATE CACHED TABLE "public"."flyway_schema_history"`.
+> To dane wyłącznie deweloperskie (`.data` jest w `.gitignore`), odtwarzają się
+> z seeda przy następnym starcie. `clean` jest tu równie ważny jak skasowanie
+> bazy: bez niego na ścieżce klas zostaje stary `flyway-core` i to on, a nie
+> Liquibase, próbuje prowadzić migracje.
+
 ### Na PostgreSQL-u
 
 ```bash
