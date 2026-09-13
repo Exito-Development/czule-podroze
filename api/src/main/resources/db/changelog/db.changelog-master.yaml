@@ -1,0 +1,17 @@
+# Główny changelog Liquibase.
+#
+# Kolejność plików jest kolejnością wykonania — nowe zmiany schematu dopisujemy
+# na końcu, nigdy nie edytując plików już wgranych na produkcję (Liquibase
+# pilnuje tego sumą kontrolną i odmówi startu, gdy plik się zmieni).
+#
+# Dane przykładowe są odcięte znacznikiem `seed`: uruchamiają się tylko wtedy,
+# gdy kontekst uruchomienia go zawiera. UWAGA — Liquibase bez podanego kontekstu
+# wykonuje WSZYSTKO, łącznie z oznaczonymi zmianami, dlatego każdy profil
+# aplikacji ustawia `spring.liquibase.contexts` jawnie.
+databaseChangeLog:
+  - include:
+      file: db/changelog/001-schema.yaml
+  - include:
+      file: db/changelog/002-participants-and-messages.yaml
+  - include:
+      file: db/changelog/900-seed-trips.yaml

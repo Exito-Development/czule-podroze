@@ -4,7 +4,7 @@ Backend rezerwacji wyjazdów: katalog z planem dzień po dniu, koszyk z realną
 blokadą miejsc, zamówienia, płatności, lista rezerwowa i podgląd rezerwacji.
 
 **Stos:** Java 21 · Spring Boot 4.1 (Spring Framework 7, Spring Security 7) ·
-Hibernate 7 · Flyway · PostgreSQL (produkcja) / H2 (lokalnie i testy) ·
+Hibernate 7 · Liquibase · PostgreSQL (produkcja) / H2 (lokalnie i testy) ·
 springdoc-openapi.
 
 ## Uruchomienie
@@ -123,20 +123,58 @@ lokalnie. Podłączenie Przelewów24 albo Stripe'a to nowa implementacja
 | `PAYMENTS_PROVIDER` | `mock` albo docelowy operator |
 | `PAYMENTS_WEBHOOK_SECRET` | sekret powiadomień operatora |
 | `ADMIN_PASSWORD` | hasło startowe konta organizatorki |
+| `LIQUIBASE_CONTEXTS` | konteksty migracji, domyślnie `prod` (bez danych przykładowych) |
 
 Parametry rezerwacji (`czula.booking.*`): czas blokady w koszyku, okno
 płatności, maksimum miejsc na jedną pozycję.
 
+## Migracje schematu
+
+Schemat prowadzi Liquibase. Wszystko wychodzi od
+`src/main/resources/db/changelog/db.changelog-master.yaml`:
+
+| Plik | Zawartość |
+| --- | --- |
+| `001-schema.yaml` | tabele katalogu, koszyka, zamówień, płatności, listy rezerwowej |
+| `002-participants-and-messages.yaml` | uczestniczki, wiadomości, doręczenia |
+| `900-seed-trips.yaml` | przykładowe wyjazdy, tylko w kontekście `seed` |
+
+Kontekst jest podawany jawnie w każdym profilu (`spring.liquibase.contexts`),
+bo Liquibase uruchomiony **bez** kontekstu wykonuje wszystkie zmiany — także
+dane przykładowe. Produkcja jedzie na `prod` i dostaje sam schemat; `local`
+i `postgres` mają `local,seed`, testy `test`.
+
+Hibernate stoi na `ddl-auto: validate` — schemat pochodzi wyłącznie
+z changelogów, nigdy z encji.
+
+### Baza, która była wcześniej na Flyway
+
+Jeśli baza ma już tabelę `flyway_schema_history` i komplet tabel, Liquibase
+przy pierwszym uruchomieniu spróbowałby założyć je od nowa. Najpierw trzeba go
+poinformować, że zmiany są już wgrane:
+
+```bash
+mvn liquibase:changelogSync \
+  -Dliquibase.url=<jdbc-url> \
+  -Dliquibase.username=<user> \
+  -Dliquibase.password=<haslo> \
+  -Dliquibase.contexts=prod
+```
+
+Polecenie tylko zapisuje changesety w `DATABASECHANGELOG`, nie rusza danych.
+Potem `flyway_schema_history` można usunąć.
+
 ## Dane przykładowe
 
-`db/seed/V1000__seed_trips.sql` jest generowany z danych frontendu, żeby obie
+`db/changelog/seed/trips.sql` jest generowany z danych frontendu, żeby obie
 strony pokazywały te same wyjazdy:
 
 ```bash
 node api/tools/generate-seed.mjs   # uruchamiać z katalogu głównego repo
 ```
 
-Seed wgrywa się tylko w profilach `local` i `postgres` — produkcja dostaje sam
+Plik wchodzi do bazy przez changeset `900-seed-trips.yaml`, czyli tylko
+w profilach z kontekstem `seed` (`local`, `postgres`) — produkcja dostaje sam
 schemat.
 
 ## Co zostało do zrobienia przed go-live

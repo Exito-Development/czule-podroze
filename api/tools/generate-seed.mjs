@@ -1,7 +1,7 @@
 // Generuje seed SQL z tych samych danych, które ma frontend — dzięki temu
 // lokalna baza i statyczny fallback nie rozjeżdżają się ze sobą.
 import { readFileSync, writeFileSync } from "node:fs";
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 
 const source = readFileSync("src/lib/data/trips.ts", "utf8");
 const start = source.indexOf("export const trips: Trip[] = [");
@@ -19,6 +19,18 @@ for (let i = arrayStart; i < source.length; i++) {
 const literal = source.slice(arrayStart, end + 1);
 const trips = eval(`(${literal})`);
 
+// Identyfikatory wyprowadzamy z nazwy encji, a nie losujemy. Dzięki temu
+// ponowne wygenerowanie pliku bez zmian w danych daje bajt w bajt ten sam SQL —
+// suma kontrolna changesetu Liquibase zostaje nienaruszona, a w diffie widać
+// wyłącznie to, co naprawdę się zmieniło. Kształt jak UUID v5 (SHA-1 z nazwy).
+const uuid = (name) => {
+  const h = createHash("sha1").update(`czula-podroz:${name}`).digest();
+  h[6] = (h[6] & 0x0f) | 0x50;          // wersja 5
+  h[8] = (h[8] & 0x3f) | 0x80;          // wariant RFC 4122
+  const hex = h.subarray(0, 16).toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
+
 const continentMap = { "Azja": "ASIA", "Afryka": "AFRICA", "Europa": "EUROPE" };
 const q = (v) => v === null || v === undefined ? "null" : `'${String(v).replace(/'/g, "''")}'`;
 const NOW = "current_timestamp";
@@ -26,11 +38,12 @@ const NOW = "current_timestamp";
 const lines = [
   "-- Dane startowe wyjazdów (środowisko lokalne / demo).",
   "-- Plik generowany z src/lib/data/trips.ts — patrz api/README.md.",
+  "-- Wgrywa go changeset `seed-trips` z db/changelog/900-seed-trips.yaml.",
   "",
 ];
 
 for (const trip of trips) {
-  const tripId = randomUUID();
+  const tripId = uuid(`trip:${trip.slug}`);
   lines.push(`-- ${trip.title}`);
   lines.push(`insert into trips (id, created_at, updated_at, version, slug, title, tagline, continent, country,`);
   lines.push(`                   duration_days, start_date, end_date, price, deposit, capacity, booked_seats,`);
@@ -48,12 +61,12 @@ for (const trip of trips) {
 
   trip.destinations.forEach((destination, index) => {
     lines.push(`insert into trip_destinations (id, created_at, updated_at, version, trip_id, position_index, name, day_range, description, image)`);
-    lines.push(`values (${q(randomUUID())}, ${NOW}, ${NOW}, 0, ${q(tripId)}, ${index}, ${q(destination.name)}, ${q(destination.dayRange)}, ${q(destination.description)}, ${q(destination.image)});`);
+    lines.push(`values (${q(uuid(`destination:${trip.slug}:${index}`))}, ${NOW}, ${NOW}, 0, ${q(tripId)}, ${index}, ${q(destination.name)}, ${q(destination.dayRange)}, ${q(destination.description)}, ${q(destination.image)});`);
   });
   lines.push("");
 
   for (const day of trip.itinerary) {
-    const dayId = randomUUID();
+    const dayId = uuid(`day:${trip.slug}:${day.day}`);
     lines.push(`insert into trip_days (id, created_at, updated_at, version, trip_id, day_number, title, description)`);
     lines.push(`values (${q(dayId)}, ${NOW}, ${NOW}, 0, ${q(tripId)}, ${day.day}, ${q(day.title)}, ${q(day.description)});`);
     (day.tags ?? []).forEach((tag, index) => {
@@ -63,5 +76,5 @@ for (const trip of trips) {
   lines.push("");
 }
 
-writeFileSync("api/src/main/resources/db/seed/V1000__seed_trips.sql", lines.join("\n") + "\n");
+writeFileSync("api/src/main/resources/db/changelog/seed/trips.sql", lines.join("\n") + "\n");
 console.log("wygenerowano", trips.length, "wyjazdów");

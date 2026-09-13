@@ -6,16 +6,22 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      # Schematem zarządza Flyway; Hibernate ma go tylko sprawdzać.
+      # Schematem zarządza Liquibase; Hibernate ma go tylko sprawdzać.
       ddl-auto: validate
     properties:
       hibernate:
         jdbc.time_zone: UTC
         # Ogranicza N+1 przy wczytywaniu planów wyjazdów.
         default_batch_fetch_size: 50
-  flyway:
+  liquibase:
     enabled: true
-    locations: classpath:db/migration
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    # Bez telemetrii — start aplikacji nie ma powodu dzwonić na zewnątrz
+    # (w zamkniętej sieci produkcyjnej to zbędne opóźnienie przy każdym starcie).
+    analytics-enabled: false
+    # Kontekst MUSI być podany jawnie w każdym profilu: Liquibase bez kontekstu
+    # wykonuje wszystkie zmiany, także te oznaczone jako dane przykładowe.
+    contexts: ${LIQUIBASE_CONTEXTS:prod}
   jackson:
     # Jackson 3 (Spring Boot 4) domyślnie serializuje daty jako ISO-8601,
     # więc wystarczy pominąć puste pola w odpowiedziach.

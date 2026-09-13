@@ -2,13 +2,17 @@
 # Baza H2 w pliku (dane przeżywają restart), atrapa płatności, dane startowe.
 spring:
   datasource:
-    url: jdbc:h2:file:./.data/czula;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE
+    # Bez DATABASE_TO_LOWER: Liquibase zakłada swoje tabele (DATABASECHANGELOG)
+    # wersalikami niezależnie od ustawień H2, więc przy składaniu nazw na małe
+    # litery nie rozpoznaje ich przy kolejnym starcie i próbuje założyć je jeszcze
+    # raz. Domyślne składanie H2 (wersaliki) godzi jedno z drugim.
+    url: jdbc:h2:file:./.data/czula;MODE=PostgreSQL;AUTO_SERVER=TRUE
     username: sa
     password: ""
     driver-class-name: org.h2.Driver
-  flyway:
-    # Oprócz schematu wgrywamy też przykładowe wyjazdy.
-    locations: classpath:db/migration,classpath:db/seed
+  liquibase:
+    # Kontekst `seed` dokłada do schematu przykładowe wyjazdy.
+    contexts: local,seed
 
 czula:
   security:

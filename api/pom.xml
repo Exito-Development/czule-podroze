@@ -54,19 +54,11 @@
       <artifactId>spring-boot-starter-mail</artifactId>
     </dependency>
 
-    <!-- Spring Boot 4 wydzielił autokonfiguracje do osobnych modułów:
-         samo flyway-core nie uruchomi migracji przy starcie. -->
+    <!-- Migracje schematu. Starter wnosi zarówno bibliotekę, jak i
+         autokonfigurację — Spring Boot 4 trzyma je w osobnych modułach. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-flyway</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-database-postgresql</artifactId>
+      <artifactId>spring-boot-starter-liquibase</artifactId>
     </dependency>
 
     <dependency>
@@ -109,6 +101,19 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <!-- Operacje na schemacie poza startem aplikacji: changelogSync przy
+           przejmowaniu bazy prowadzonej wcześniej przez Flyway, status, rollback.
+           Połączenie podaje się z linii poleceń (-Dliquibase.url=...), żeby
+           żadne dane dostępowe nie leżały w repozytorium. -->
+      <plugin>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-maven-plugin</artifactId>
+        <version>${liquibase.version}</version>
+        <configuration>
+          <changeLogFile>db/changelog/db.changelog-master.yaml</changeLogFile>
+          <searchPath>${project.basedir}/src/main/resources</searchPath>
+        </configuration>
       </plugin>
     </plugins>
   </build>

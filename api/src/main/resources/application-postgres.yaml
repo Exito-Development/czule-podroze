@@ -4,8 +4,8 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/czula}
     username: ${DATABASE_USER:czula}
     password: ${DATABASE_PASSWORD:czula}
-  flyway:
-    locations: classpath:db/migration,classpath:db/seed
+  liquibase:
+    contexts: local,seed
 
 czula:
   security:

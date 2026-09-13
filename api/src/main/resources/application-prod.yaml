@@ -7,9 +7,9 @@ spring:
     password: ${DATABASE_PASSWORD}
     hikari:
       maximum-pool-size: ${DB_POOL_SIZE:10}
-  flyway:
-    # Bez danych przykładowych.
-    locations: classpath:db/migration
+  liquibase:
+    # Bez danych przykładowych — kontekst `seed` się tu nie pojawia.
+    contexts: prod
 
 czula:
   payments:
