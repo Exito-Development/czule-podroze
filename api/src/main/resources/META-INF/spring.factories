@@ -1,6 +1,0 @@
-# Spring Boot 4 wczytuje procesory środowiska z tego pliku, a nie z
-# META-INF/spring/....imports (to konwencja z wersji 3). Interfejs również
-# przeniósł się do org.springframework.boot — ten w org.springframework.boot.env
-# nadal istnieje, ale nie jest ładowany.
-org.springframework.boot.EnvironmentPostProcessor=\
-pl.czulapodroz.api.common.config.DatabaseUrlNormalizer

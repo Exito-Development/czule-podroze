@@ -2,14 +2,13 @@
 # Aplikacja nie wstanie bez JWT_SECRET i danych bazy; to celowe.
 spring:
   datasource:
-    # Jedna zmienna wystarczy. DATABASE_URL z usługi bazy ma postać
-    # `postgresql://login:haslo@host:5432/baza`, a DatabaseUrlNormalizer
-    # zamienia ją przed startem puli na adres JDBC i wyciąga z niej dane
-    # logowania. Nie ma więc czego przepisywać ręcznie do trzech zmiennych.
-    url: ${DATABASE_URL}
-    # Używane tylko wtedy, gdy adres NIE zawiera danych logowania.
-    username: ${PGUSER:}
-    password: ${PGPASSWORD:}
+    # Adres składamy z pojedynczych zmiennych, które wystawia usługa bazy.
+    # Jej własne DATABASE_URL ma postać `postgresql://…`, której sterownik JDBC
+    # nie przyjmie — a przedrostek `jdbc:` to wymóg sterownika, nie dana
+    # konfiguracyjna, więc dopisujemy go tutaj na stałe.
+    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:czula}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
     hikari:
       maximum-pool-size: ${DB_POOL_SIZE:10}
   liquibase:
