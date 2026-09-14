@@ -1,5 +1,7 @@
 /node_modules
+# Katalogi builda, także te spod NEXT_DIST_DIR (.next-check, .next-verify, …)
 /.next/
+/.next-*/
 /out/
 /build
 .DS_Store
