@@ -2,8 +2,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:czula}
-    username: ${DATABASE_USER:czula}
-    password: ${DATABASE_PASSWORD:czula}
+    username: ${POSTGRES_USER:czula}
+    password: ${POSTGRES_PASSWORD:czula}
   liquibase:
     contexts: local,seed
 
