@@ -232,9 +232,7 @@ package` przechodzi, więc nic potrzebnego nie zostało odcięte.
 
 ```
 SPRING_PROFILES_ACTIVE = prod
-DATABASE_URL      = jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}
-DATABASE_USER     = ${{Postgres.PGUSER}}
-DATABASE_PASSWORD = ${{Postgres.PGPASSWORD}}
+DATABASE_URL      = ${{Postgres.DATABASE_URL}}
 JWT_SECRET        = <openssl rand -base64 48>
 ADMIN_EMAIL       = admin@czulapodroz.pl
 ADMIN_PASSWORD    = <hasło startowe organizatorki>
@@ -258,11 +256,16 @@ prowadziłyby na localhost, przeglądarka blokowałaby żądania z prawdziwej do
 a bramka wracałaby pod zły adres. Brak którejkolwiek zmiennej zatrzymuje start
 z komunikatem wskazującym nazwę brakującej właściwości.
 
-**Przedrostek `jdbc:` jest obowiązkowy.** Railway udostępnia własną zmienną
-`DATABASE_URL` w formacie `postgresql://user:hasło@host/baza`, którego Spring
-nie przyjmie — aplikacja pada wtedy na `Failed to determine a suitable driver
-class`. Dlatego adres składamy z osobnych zmiennych bazy, a login i hasło
-podajemy oddzielnie.
+**Adres bazy to jedna zmienna.** Usługa PostgreSQL wystawia `DATABASE_URL`
+w formacie `postgresql://login:hasło@host:5432/baza`, którego Spring sam nie
+przyjmie (`'url' must start with "jdbc"`). Tłumaczy go `DatabaseUrlNormalizer`:
+przed utworzeniem puli połączeń zamienia adres na postać JDBC i wyciąga z niego
+login oraz hasło. Dzięki temu w usłudze API wskazujesz referencją tę jedną
+zmienną z usługi bazy i nic nie przepisujesz ręcznie.
+
+Adres podany od razu w postaci JDBC zostaje nietknięty, więc profil lokalny
+(H2) i testy działają bez zmian. `PGUSER` i `PGPASSWORD` przydają się tylko
+wtedy, gdy adres nie zawiera danych logowania.
 
 `PORT` wstrzykuje Railway — nie ustawiaj go ręcznie (aplikacja czyta
 `${PORT:8080}`).
