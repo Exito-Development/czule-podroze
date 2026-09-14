@@ -3,26 +3,14 @@
 spring:
   datasource:
     url: ${DATABASE_URL}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     hikari:
       maximum-pool-size: ${DB_POOL_SIZE:10}
   liquibase:
-    # Bez danych przykładowych — kontekst `seed` się tu nie pojawia.
     contexts: prod
 
 czula:
-  # Adresy bez wartości domyślnych — i to jest tu sedno.
-  #
-  # W pliku bazowym mają domyślne `localhost`, bo tam służą pracy na własnym
-  # komputerze. Gdyby produkcja je odziedziczyła, nic by nie krzyknęło, a szkody
-  # byłyby ciche i kosztowne: linki do rezerwacji wysyłane klientkom
-  # prowadziłyby na localhost, przeglądarka blokowałaby żądania z prawdziwej
-  # domeny, a bramka płatnicza wracałaby pod zły adres.
-  #
-  # Zapis ${ZMIENNA} bez dwukropka nie ma wartości zapasowej, więc brak zmiennej
-  # zatrzymuje start aplikacji — tak samo jak przy JWT_SECRET. Lepiej, żeby
-  # wdrożenie się nie udało, niż żeby ruszyło i działało źle po cichu.
   frontend:
     base-url: ${FRONTEND_BASE_URL}
   cors:
@@ -34,10 +22,6 @@ czula:
     # Konto organizatorki zakładane przy pierwszym starcie, jeśli jeszcze nie
     # istnieje. Bez tego po wdrożeniu nie ma się czym zalogować do panelu,
     # więc nie da się dodać żadnego wyjazdu i katalog zostaje pusty.
-    #
-    # Świadomie BEZ wartości domyślnych: konto z hasłem wpisanym w repozytorium
-    # byłoby gotowym wejściem do panelu dla każdego, kto zna ten kod. Gdy
-    # zmienne nie są ustawione, konto po prostu nie powstaje.
     bootstrap-email: ${ADMIN_EMAIL:}
     bootstrap-password: ${ADMIN_PASSWORD:}
 
