@@ -11,5 +11,9 @@ RUN addgroup -S czula && adduser -S czula -G czula
 COPY --from=build /build/target/*.jar app.jar
 USER czula
 EXPOSE 8080
+# Bez tego działa `spring.profiles.default: local` — profil lokalny trzyma bazę
+# w pliku H2 obok aplikacji, czego /app nie pozwala założyć. Zmienna ustawiona
+# na platformie i tak wygrywa.
+ENV SPRING_PROFILES_ACTIVE=prod
 ENV JAVA_OPTS="-XX:MaxRAM=512m -XX:MaxRAMPercentage=75"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

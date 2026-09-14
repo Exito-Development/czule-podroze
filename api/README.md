@@ -243,6 +243,13 @@ API_BASE_URL      = https://api.czulapodroz.pl
 CORS_ALLOWED_ORIGINS = https://czulapodroz.pl,https://admin.czulapodroz.pl
 ```
 
+> **Profil musi być ustawiony.** `application.yaml` ma
+> `spring.profiles.default: local`, więc brak `SPRING_PROFILES_ACTIVE` oznacza
+> profil lokalny — a ten trzyma bazę w pliku H2 obok aplikacji. W kontenerze
+> kończy się to błędem `AccessDeniedException: /app/.data`, bo katalog nie
+> należy do użytkownika aplikacji. Obraz ustawia `SPRING_PROFILES_ACTIVE=prod`
+> jako domyślny, ale zmienna w panelu i tak jest pewniejsza — i wygrywa.
+
 Wszystkie powyższe są **wymagane**. Profil `prod` celowo nie ma dla nich
 wartości zapasowych: w pliku bazowym adresy domyślne wskazują `localhost`, bo
 tam służą pracy na własnym komputerze. Gdyby produkcja je odziedziczyła, nic by
