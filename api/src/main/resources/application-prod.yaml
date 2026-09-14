@@ -1,14 +1,8 @@
-# Profil produkcyjny — wszystko wrażliwe pochodzi ze zmiennych środowiskowych.
-# Aplikacja nie wstanie bez JWT_SECRET i danych bazy; to celowe.
 spring:
   datasource:
-    # Adres składamy z pojedynczych zmiennych, które wystawia usługa bazy.
-    # Jej własne DATABASE_URL ma postać `postgresql://…`, której sterownik JDBC
-    # nie przyjmie — a przedrostek `jdbc:` to wymóg sterownika, nie dana
-    # konfiguracyjna, więc dopisujemy go tutaj na stałe.
     url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:czula}
-    username: ${PGUSER}
-    password: ${PGPASSWORD}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     hikari:
       maximum-pool-size: ${DB_POOL_SIZE:10}
   liquibase:
