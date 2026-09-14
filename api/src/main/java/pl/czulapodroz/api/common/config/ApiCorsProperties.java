@@ -12,6 +12,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record ApiCorsProperties(List<String> allowedOrigins) {
 
     public ApiCorsProperties {
-        allowedOrigins = allowedOrigins == null ? List.of() : List.copyOf(allowedOrigins);
+        allowedOrigins =
+                allowedOrigins == null
+                        ? List.of()
+                        : allowedOrigins.stream()
+                                .map(origin ->
+                                        RequiredConfig.resolved(origin, "czula.cors.allowed-origins"))
+                                .toList();
     }
 }

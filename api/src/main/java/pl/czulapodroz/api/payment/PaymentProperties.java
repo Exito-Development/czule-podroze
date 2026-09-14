@@ -1,6 +1,7 @@
 package pl.czulapodroz.api.payment;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import pl.czulapodroz.api.common.config.RequiredConfig;
 
 /**
  * Konfiguracja płatności.
@@ -14,7 +15,11 @@ public record PaymentProperties(String provider, String apiBaseUrl, String webho
 
     public PaymentProperties {
         provider = provider == null ? "mock" : provider;
-        apiBaseUrl = apiBaseUrl == null ? "http://localhost:8080" : stripTrailingSlash(apiBaseUrl);
+        apiBaseUrl =
+                apiBaseUrl == null
+                        ? "http://localhost:8080"
+                        : stripTrailingSlash(
+                                RequiredConfig.resolved(apiBaseUrl, "czula.payments.api-base-url"));
     }
 
     private static String stripTrailingSlash(String value) {

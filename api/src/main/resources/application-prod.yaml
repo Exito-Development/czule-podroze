@@ -12,8 +12,24 @@ spring:
     contexts: prod
 
 czula:
+  # Adresy bez wartości domyślnych — i to jest tu sedno.
+  #
+  # W pliku bazowym mają domyślne `localhost`, bo tam służą pracy na własnym
+  # komputerze. Gdyby produkcja je odziedziczyła, nic by nie krzyknęło, a szkody
+  # byłyby ciche i kosztowne: linki do rezerwacji wysyłane klientkom
+  # prowadziłyby na localhost, przeglądarka blokowałaby żądania z prawdziwej
+  # domeny, a bramka płatnicza wracałaby pod zły adres.
+  #
+  # Zapis ${ZMIENNA} bez dwukropka nie ma wartości zapasowej, więc brak zmiennej
+  # zatrzymuje start aplikacji — tak samo jak przy JWT_SECRET. Lepiej, żeby
+  # wdrożenie się nie udało, niż żeby ruszyło i działało źle po cichu.
+  frontend:
+    base-url: ${FRONTEND_BASE_URL}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
   payments:
     provider: ${PAYMENTS_PROVIDER:mock}
+    api-base-url: ${API_BASE_URL}
   admin:
     # Konto organizatorki zakładane przy pierwszym starcie, jeśli jeszcze nie
     # istnieje. Bez tego po wdrożeniu nie ma się czym zalogować do panelu,

@@ -243,6 +243,14 @@ API_BASE_URL      = https://api.czulapodroz.pl
 CORS_ALLOWED_ORIGINS = https://czulapodroz.pl,https://admin.czulapodroz.pl
 ```
 
+Wszystkie powyższe są **wymagane**. Profil `prod` celowo nie ma dla nich
+wartości zapasowych: w pliku bazowym adresy domyślne wskazują `localhost`, bo
+tam służą pracy na własnym komputerze. Gdyby produkcja je odziedziczyła, nic by
+nie krzyknęło, a szkody byłyby ciche — linki do rezerwacji wysyłane klientkom
+prowadziłyby na localhost, przeglądarka blokowałaby żądania z prawdziwej domeny,
+a bramka wracałaby pod zły adres. Brak którejkolwiek zmiennej zatrzymuje start
+z komunikatem wskazującym nazwę brakującej właściwości.
+
 **Przedrostek `jdbc:` jest obowiązkowy.** Railway udostępnia własną zmienną
 `DATABASE_URL` w formacie `postgresql://user:hasło@host/baza`, którego Spring
 nie przyjmie — aplikacja pada wtedy na `Failed to determine a suitable driver

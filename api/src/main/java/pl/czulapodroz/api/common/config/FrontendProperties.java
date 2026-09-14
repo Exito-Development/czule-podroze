@@ -12,7 +12,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record FrontendProperties(String baseUrl) {
 
     public FrontendProperties {
-        baseUrl = baseUrl == null ? "http://localhost:3002" : stripTrailingSlash(baseUrl);
+        baseUrl =
+                baseUrl == null
+                        ? "http://localhost:3002"
+                        : stripTrailingSlash(
+                                RequiredConfig.resolved(baseUrl, "czula.frontend.base-url"));
     }
 
     private static String stripTrailingSlash(String value) {
