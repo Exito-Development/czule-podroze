@@ -1,7 +1,7 @@
 # Profil dla lokalnego PostgreSQL-a z docker-compose (`docker compose up -d db`).
 spring:
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/czula}
+    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:czula}
     username: ${DATABASE_USER:czula}
     password: ${DATABASE_PASSWORD:czula}
   liquibase:

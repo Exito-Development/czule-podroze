@@ -24,9 +24,6 @@ czula:
     provider: ${PAYMENTS_PROVIDER:mock}
     api-base-url: ${API_BASE_URL}
   admin:
-    # Konto organizatorki zakładane przy pierwszym starcie, jeśli jeszcze nie
-    # istnieje. Bez tego po wdrożeniu nie ma się czym zalogować do panelu,
-    # więc nie da się dodać żadnego wyjazdu i katalog zostaje pusty.
     bootstrap-email: ${ADMIN_EMAIL:}
     bootstrap-password: ${ADMIN_PASSWORD:}
 
