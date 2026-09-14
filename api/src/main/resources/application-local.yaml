@@ -1,0 +1,33 @@
+# Profil lokalny — uruchomienie bez żadnej zewnętrznej infrastruktury.
+# Baza H2 w pliku (dane przeżywają restart), atrapa płatności, dane startowe.
+spring:
+  datasource:
+    # Bez DATABASE_TO_LOWER: Liquibase zakłada swoje tabele (DATABASECHANGELOG)
+    # wersalikami niezależnie od ustawień H2, więc przy składaniu nazw na małe
+    # litery nie rozpoznaje ich przy kolejnym starcie i próbuje założyć je jeszcze
+    # raz. Domyślne składanie H2 (wersaliki) godzi jedno z drugim.
+    url: jdbc:h2:file:./.data/czula;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  liquibase:
+    # Kontekst `seed` dokłada do schematu przykładowe wyjazdy.
+    contexts: local,seed
+
+czula:
+  security:
+    jwt:
+      # Sekret wyłącznie na lokalne środowisko. Produkcja bierze go z ENV.
+      secret: ${JWT_SECRET:lokalny-sekret-do-developmentu-czula-podroz-2026}
+  payments:
+    provider: mock
+    webhook-secret: ${PAYMENTS_WEBHOOK_SECRET:lokalny-sekret-webhooka}
+  admin:
+    # Konto organizatorki zakładane przy starcie, jeśli jeszcze nie istnieje.
+    bootstrap-email: admin@czulapodroz.pl
+    bootstrap-password: ${ADMIN_PASSWORD:CzulaPodroz2026!}
+
+logging:
+  level:
+    pl.czulapodroz.api: DEBUG
+    org.hibernate.SQL: INFO

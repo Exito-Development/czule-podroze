@@ -1,0 +1,1079 @@
+# Czuła Podróż — schemat początkowy.
+#
+# Typy są opisane abstrakcyjnie (UUID, NUMERIC, TIMESTAMP WITH TIME ZONE),
+# więc Liquibase generuje właściwy dialekt dla PostgreSQL (produkcja)
+# i H2 (środowisko lokalne oraz testy).
+databaseChangeLog:
+  - changeSet:
+      id: trips
+      author: czula-podroz
+      comment: 'Wyjazdy — korzeń oferty.'
+      changes:
+        - createTable:
+            tableName: trips
+            remarks: 'Wyjazdy — korzeń oferty.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_trips
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: slug
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_trips_slug
+              - column:
+                  name: title
+                  type: VARCHAR(160)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tagline
+                  type: VARCHAR(300)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: continent
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: country
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: duration_days
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deposit
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: capacity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: booked_seats
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: published
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cover_image
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: postgresql,h2
+            sql: alter table trips add constraint ck_trips_capacity check (capacity >= 0)
+        - sql:
+            dbms: postgresql,h2
+            sql: alter table trips add constraint ck_trips_booked check (booked_seats >= 0 and booked_seats <= capacity)
+      rollback:
+        - sql:
+            dbms: postgresql,h2
+            sql: alter table trips drop constraint ck_trips_capacity
+        - sql:
+            dbms: postgresql,h2
+            sql: alter table trips drop constraint ck_trips_booked
+        - dropTable:
+            tableName: trips
+
+  - changeSet:
+      id: trip_included
+      author: czula-podroz
+      comment: 'Lista pozycji w cenie — kolekcja tekstów przypięta do wyjazdu.'
+      changes:
+        - createTable:
+            tableName: trip_included
+            remarks: 'Lista pozycji w cenie — kolekcja tekstów przypięta do wyjazdu.'
+            columns:
+              - column:
+                  name: trip_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trip_included_trip
+                    references: trips(id)
+                    deleteCascade: true
+              - column:
+                  name: position_index
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: item
+                  type: VARCHAR(300)
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: trip_included
+            columnNames: trip_id, position_index
+            constraintName: pk_trip_included
+
+  - changeSet:
+      id: trip_days
+      author: czula-podroz
+      comment: 'Plan dzień po dniu — z niego powstaje oś czasu na stronie.'
+      changes:
+        - createTable:
+            tableName: trip_days
+            remarks: 'Plan dzień po dniu — z niego powstaje oś czasu na stronie.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_trip_days
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trip_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trip_days_trip
+                    references: trips(id)
+                    deleteCascade: true
+              - column:
+                  name: day_number
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(160)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(2000)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: trip_days
+            columnNames: trip_id, day_number
+            constraintName: uk_trip_days_number
+
+  - changeSet:
+      id: trip_day_tags
+      author: czula-podroz
+      comment: 'Tagi dnia (warsztat, fitness, relaks…).'
+      changes:
+        - createTable:
+            tableName: trip_day_tags
+            remarks: 'Tagi dnia (warsztat, fitness, relaks…).'
+            columns:
+              - column:
+                  name: trip_day_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trip_day_tags_day
+                    references: trip_days(id)
+                    deleteCascade: true
+              - column:
+                  name: position_index
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tag
+                  type: VARCHAR(40)
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: trip_day_tags
+            columnNames: trip_day_id, position_index
+            constraintName: pk_trip_day_tags
+
+  - changeSet:
+      id: trip_destinations
+      author: czula-podroz
+      comment: 'Kolejne miejsca w ramach jednego wyjazdu.'
+      changes:
+        - createTable:
+            tableName: trip_destinations
+            remarks: 'Kolejne miejsca w ramach jednego wyjazdu.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_trip_destinations
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trip_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trip_destinations_trip
+                    references: trips(id)
+                    deleteCascade: true
+              - column:
+                  name: position_index
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: day_range
+                  type: VARCHAR(60)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: image
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: trip_destinations
+            indexName: ix_trip_destinations_trip
+            columns:
+              - column:
+                  name: trip_id
+
+  - changeSet:
+      id: user_accounts
+      author: czula-podroz
+      comment: 'Konta klientek i organizatorek.'
+      changes:
+        - createTable:
+            tableName: user_accounts
+            remarks: 'Konta klientek i organizatorek.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_user_accounts
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(320)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_user_accounts_email
+              - column:
+                  name: password_hash
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: last_name
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: role
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: refresh_tokens
+      author: czula-podroz
+      comment: 'Tokeny odświeżające — trzymane wyłącznie jako skrót.'
+      changes:
+        - createTable:
+            tableName: refresh_tokens
+            remarks: 'Tokeny odświeżające — trzymane wyłącznie jako skrót.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_refresh_tokens
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_refresh_tokens_user
+                    references: user_accounts(id)
+                    deleteCascade: true
+              - column:
+                  name: token_hash
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_refresh_tokens_hash
+              - column:
+                  name: family_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: revoked_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: true
+        - createIndex:
+            tableName: refresh_tokens
+            indexName: ix_refresh_tokens_user
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: refresh_tokens
+            indexName: ix_refresh_tokens_family
+            columns:
+              - column:
+                  name: family_id
+
+  - changeSet:
+      id: carts
+      author: czula-podroz
+      comment: 'Koszyk klientki.'
+      changes:
+        - createTable:
+            tableName: carts
+            remarks: 'Koszyk klientki.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_carts
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: true
+        - createIndex:
+            tableName: carts
+            indexName: ix_carts_user
+            columns:
+              - column:
+                  name: user_id
+
+  - changeSet:
+      id: cart_items
+      author: czula-podroz
+      comment: 'Pozycja koszyka.'
+      changes:
+        - createTable:
+            tableName: cart_items
+            remarks: 'Pozycja koszyka.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_cart_items
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cart_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_cart_items_cart
+                    references: carts(id)
+                    deleteCascade: true
+              - column:
+                  name: trip_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_cart_items_trip
+                    references: trips(id)
+              - column:
+                  name: seats
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payment_mode
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: cart_items
+            columnNames: cart_id, trip_id
+            constraintName: uk_cart_items_trip
+        - sql:
+            dbms: postgresql,h2
+            sql: alter table cart_items add constraint ck_cart_items_seats check (seats > 0)
+      rollback:
+        - sql:
+            dbms: postgresql,h2
+            sql: alter table cart_items drop constraint ck_cart_items_seats
+        - dropTable:
+            tableName: cart_items
+
+  - changeSet:
+      id: seat_holds
+      author: czula-podroz
+      comment: 'Blokady miejsc: jeden koszyk trzyma najwyżej jedną blokadę na wyjazd.'
+      changes:
+        - createTable:
+            tableName: seat_holds
+            remarks: 'Blokady miejsc: jeden koszyk trzyma najwyżej jedną blokadę na wyjazd.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_seat_holds
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trip_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_seat_holds_trip
+                    references: trips(id)
+                    deleteCascade: true
+              - column:
+                  name: cart_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: UUID
+                  constraints:
+                    nullable: true
+              - column:
+                  name: seats
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: seat_holds
+            columnNames: cart_id, trip_id
+            constraintName: uk_seat_holds_cart_trip
+        - createIndex:
+            tableName: seat_holds
+            indexName: ix_seat_holds_trip_status
+            columns:
+              - column:
+                  name: trip_id
+              - column:
+                  name: status
+              - column:
+                  name: expires_at
+        - createIndex:
+            tableName: seat_holds
+            indexName: ix_seat_holds_order
+            columns:
+              - column:
+                  name: order_id
+        - sql:
+            dbms: postgresql,h2
+            sql: alter table seat_holds add constraint ck_seat_holds_seats check (seats > 0)
+      rollback:
+        - sql:
+            dbms: postgresql,h2
+            sql: alter table seat_holds drop constraint ck_seat_holds_seats
+        - dropTable:
+            tableName: seat_holds
+
+  - changeSet:
+      id: orders
+      author: czula-podroz
+      comment: 'Zamówienia. Tabela `orders`, bo ORDER to słowo kluczowe SQL.'
+      changes:
+        - createTable:
+            tableName: orders
+            remarks: 'Zamówienia. Tabela `orders`, bo ORDER to słowo kluczowe SQL.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_orders
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_number
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_orders_number
+              - column:
+                  name: cart_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: true
+              - column:
+                  name: customer_first_name
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: customer_last_name
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: customer_email
+                  type: VARCHAR(320)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: customer_phone
+                  type: VARCHAR(40)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: customer_note
+                  type: VARCHAR(2000)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount_due_now
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount_paid
+                  type: NUMERIC(12, 2)
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trip_total
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payment_deadline
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: paid_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: true
+              - column:
+                  name: cancelled_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: true
+              - column:
+                  name: access_token_hash
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: orders
+            indexName: ix_orders_user
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: orders
+            indexName: ix_orders_email
+            columns:
+              - column:
+                  name: customer_email
+        - createIndex:
+            tableName: orders
+            indexName: ix_orders_status_deadline
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: payment_deadline
+
+  - changeSet:
+      id: order_items
+      author: czula-podroz
+      comment: 'Pozycja zamówienia z zamrożoną ceną.'
+      changes:
+        - createTable:
+            tableName: order_items
+            remarks: 'Pozycja zamówienia z zamrożoną ceną.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_order_items
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_items_order
+                    references: orders(id)
+                    deleteCascade: true
+              - column:
+                  name: trip_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_items_trip
+                    references: trips(id)
+              - column:
+                  name: trip_slug
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trip_title
+                  type: VARCHAR(160)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: seats
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payment_mode
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unit_price
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deposit_per_seat
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount_due_now
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trip_total
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: order_items
+            indexName: ix_order_items_order
+            columns:
+              - column:
+                  name: order_id
+
+  - changeSet:
+      id: payments
+      author: czula-podroz
+      comment: 'Próby płatności u operatora.'
+      changes:
+        - createTable:
+            tableName: payments
+            remarks: 'Próby płatności u operatora.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_payments
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_payments_order
+                    references: orders(id)
+                    deleteCascade: true
+              - column:
+                  name: provider
+                  type: VARCHAR(40)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: external_id
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_payments_external
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: NUMERIC(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: redirect_url
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: settled_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: true
+              - column:
+                  name: failure_reason
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: true
+        - createIndex:
+            tableName: payments
+            indexName: ix_payments_order
+            columns:
+              - column:
+                  name: order_id
+
+  - changeSet:
+      id: waitlist_entries
+      author: czula-podroz
+      comment: 'Lista rezerwowa.'
+      changes:
+        - createTable:
+            tableName: waitlist_entries
+            remarks: 'Lista rezerwowa.'
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_waitlist_entries
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trip_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_waitlist_trip
+                    references: trips(id)
+                    deleteCascade: true
+              - column:
+                  name: name
+                  type: VARCHAR(160)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(320)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: VARCHAR(40)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: invited_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: true
+        - addUniqueConstraint:
+            tableName: waitlist_entries
+            columnNames: trip_id, email
+            constraintName: uk_waitlist_trip_email
+        - createIndex:
+            tableName: waitlist_entries
+            indexName: ix_waitlist_trip
+            columns:
+              - column:
+                  name: trip_id

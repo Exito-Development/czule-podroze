@@ -26,4 +26,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/.next-prod/
+# Katalogi builda spod NEXT_DIST_DIR (.next-prod, .next-verify, …)
+/.next-*/

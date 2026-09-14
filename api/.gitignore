@@ -1,0 +1,4 @@
+target/
+# Lokalna baza H2 profilu `local`
+.data/
+*.log

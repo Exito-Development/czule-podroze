@@ -2,38 +2,45 @@ import Hero from "@/components/sections/Hero";
 import Marquee from "@/components/sections/Marquee";
 import About from "@/components/sections/About";
 import Destinations from "@/components/sections/Destinations";
-import Itinerary from "@/components/sections/Itinerary";
+import TripTimeline from "@/components/sections/TripTimeline";
 import Workshops from "@/components/sections/Workshops";
 import WhyUs from "@/components/sections/WhyUs";
 import Hosts from "@/components/sections/Hosts";
 import CtaJoin from "@/components/sections/CtaJoin";
 import Social from "@/components/sections/Social";
-import Footer from "@/components/layout/Footer";
+import FooterReveal from "@/components/layout/FooterReveal";
 import WaveDivider from "@/components/ui/WaveDivider";
+import { fetchTrips } from "@/lib/api/trips";
 
-export default function Home() {
+/** Katalog odświeżamy co minutę — dostępność miejsc zmienia się na bieżąco. */
+export const revalidate = 60;
+
+export default async function Home() {
+  const trips = await fetchTrips();
+
   return (
     <main>
       {/* Hero jest „fixed" w tle (z-0) */}
-      <Hero />
+      <Hero trips={trips} />
 
       {/* Treść nasuwa się na hero: mt-[100svh] odsłania hero na starcie,
           a solidne tło (bg-ivory) + z-10 sprawiają, że przy scrollu
-          treść przykrywa przyklejony hero. Faliste WaveDividery oddzielają
-          sekcje o różnych pastelowych tłach. */}
+          treść przykrywa przyklejony hero. To samo z-10 sprawia, że stopka
+          (fixed, z-0) czeka schowana pod treścią i wynurza się dopiero
+          na samym końcu — patrz <FooterReveal />. */}
       <div className="relative z-10 mt-[100svh] bg-ivory">
         <Marquee />
         <About />
 
         <WaveDivider bg="var(--color-ivory)" fill="var(--color-cream)" />
-        <Destinations />
+        <Destinations trips={trips} />
         <WaveDivider
           bg="var(--color-cream)"
           fill="var(--color-ivory)"
           flip
         />
 
-        <Itinerary />
+        <TripTimeline trips={trips} />
         <Workshops />
 
         <WhyUs />
@@ -48,8 +55,10 @@ export default function Home() {
 
         <Social />
         <CtaJoin />
-        <Footer />
       </div>
+
+      {/* Okno, w którym spod sekcji „Chcę jechać!" wynurza się stopka. */}
+      <FooterReveal />
     </main>
   );
 }

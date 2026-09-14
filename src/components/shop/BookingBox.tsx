@@ -36,7 +36,7 @@ export default function BookingBox({ trip }: { trip: Trip }) {
 
       {soldout ? (
         <button
-          onClick={() => openWaitlist(trip.title)}
+          onClick={() => openWaitlist(trip)}
           className="mt-6 w-full rounded-full border border-ink/20 py-4 text-sm transition-colors hover:bg-ink/5"
         >
           Zapisz się na listę rezerwową
@@ -44,14 +44,14 @@ export default function BookingBox({ trip }: { trip: Trip }) {
       ) : (
         <div className="mt-6 space-y-3">
           <button
-            onClick={() => addTrip(trip, "deposit")}
+            onClick={() => void addTrip(trip, "DEPOSIT")}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-sage py-4 text-ivory transition-colors hover:bg-sage-dark"
           >
             Chcę jechać! — zadatek
             <Icon name="dolphin" className="h-5 w-5" />
           </button>
           <button
-            onClick={() => addTrip(trip, "full")}
+            onClick={() => void addTrip(trip, "FULL")}
             className="w-full rounded-full border border-ink/20 py-3.5 text-sm transition-colors hover:bg-ink/5"
           >
             Zapłać całość ({formatPrice(trip.price)})

@@ -31,11 +31,14 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".next-prod/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next-prod/types/**/*.ts"
+    ".next-verify/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "admin",
+    "api"
   ]
 }

@@ -1,0 +1,26 @@
+# Przykładowe wyjazdy — wyłącznie środowisko lokalne i demo.
+#
+# Plik `seed/trips.sql` jest generowany z danych frontendu
+# (`node api/tools/generate-seed.mjs`), żeby obie strony pokazywały te same
+# wyjazdy. Generator wyprowadza identyfikatory z nazw, więc przebieg bez zmian
+# w danych daje dokładnie ten sam plik i suma kontrolna zostaje nienaruszona.
+# Jeśli jednak oferta się zmieni, zmieni się i plik — wtedy trzeba dopisać NOWY
+# changeset, bo Liquibase nie wykona ponownie wpisu o zmienionej sumie.
+databaseChangeLog:
+  - changeSet:
+      id: seed-trips
+      author: czula-podroz
+      contextFilter: seed
+      comment: 'Trzy wyjazdy z oferty wraz z planem dzień po dniu.'
+      changes:
+        - sqlFile:
+            path: seed/trips.sql
+            relativeToChangelogFile: true
+            encoding: UTF-8
+            splitStatements: true
+            endDelimiter: ;
+      rollback:
+        # Kasowanie wyjazdów pociąga za sobą plan, destynacje i pozycje w cenie
+        # (klucze obce mają ON DELETE CASCADE).
+        - delete:
+            tableName: trips

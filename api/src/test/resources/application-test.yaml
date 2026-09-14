@@ -1,0 +1,37 @@
+# Testy: baza w pamięci, ten sam Liquibase co w produkcji (bez danych przykładowych).
+spring:
+  datasource:
+    # Składanie nazw jak w profilu lokalnym — patrz komentarz w application-local.yaml.
+    url: jdbc:h2:mem:czula-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  liquibase:
+    contexts: test
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+czula:
+  security:
+    jwt:
+      secret: testowy-sekret-do-testow-czula-podroz-min-32-znaki
+      access-token-ttl: PT15M
+      refresh-token-ttl: P14D
+  booking:
+    hold-duration: PT20M
+    payment-window: PT60M
+    max-seats-per-item: 4
+    # Zadania cykliczne wyłączamy z drogi testów.
+    expiry-scan-interval: PT1H
+    unpaid-scan-interval: PT1H
+  payments:
+    provider: mock
+    webhook-secret: testowy-sekret-webhooka
+  admin:
+    bootstrap-email: ""
+    bootstrap-password: ""
+
+logging:
+  level:
+    org.hibernate.SQL: WARN

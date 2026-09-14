@@ -1,12 +1,13 @@
 /**
- * Warstwa danych — tymczasowo statyczna.
+ * Warstwa danych — statyczny fallback.
  *
- * Docelowo te dane będzie serwował backend (Spring Boot) przez REST/GraphQL.
- * Kształt typów jest celowo "API-friendly", więc podmiana źródła
- * (np. `getTrips()` -> fetch z backendu) nie wymusi zmian w komponentach.
+ * Docelowo te dane serwuje backend (Spring Boot, katalog `api/`) przez REST.
+ * Kształt typów jest celowo "API-friendly" i odpowiada 1:1 DTO z `/api/v1/trips`,
+ * więc podmiana źródła (patrz `src/lib/api/trips.ts`) nie wymusza zmian
+ * w komponentach. Gdy API jest nieosiągalne, strona renderuje te dane.
  */
 
-export type Continent = "Azja" | "Afryka" | "Europa" | "Ameryka";
+export type Continent = "Azja" | "Afryka" | "Europa";
 
 export type TripStatus = "open" | "few-left" | "soldout" | "upcoming";
 
@@ -125,34 +126,106 @@ export const trips: Trip[] = [
         day: 1,
         title: "Powitanie na Koh Samui",
         description:
-          "Transfer, zakwaterowanie, wieczór zapoznawczy i rozdanie gift bagów.",
+          "Transfer z lotniska, zakwaterowanie, wieczór zapoznawczy i rozdanie gift bagów.",
         tags: ["relaks", "integracja"],
       },
       {
         day: 2,
         title: "Warsztat otwarcia",
         description:
-          "Pierwsza sesja warsztatowa: bezpieczna przestrzeń, intencje na podróż.",
+          "Pierwsza sesja warsztatowa: bezpieczna przestrzeń, kontrakt grupowy, intencje na podróż.",
         tags: ["warsztat"],
       },
       {
         day: 3,
         title: "Poranna joga & plaża",
-        description: "Fitness o wschodzie słońca, dzień regeneracji nad wodą.",
+        description:
+          "Fitness o wschodzie słońca, dzień regeneracji nad wodą, wieczorny krąg dzielenia.",
         tags: ["fitness", "relaks"],
       },
       {
         day: 4,
         title: "Bliżej siebie",
         description:
-          "Warsztat z obszaru psychoseksuologii — praca z ciałem i granicami.",
+          "Warsztat z obszaru psychoseksuologii — praca z ciałem, wstydem i granicami.",
         tags: ["warsztat"],
       },
       {
         day: 5,
         title: "Lokalna kultura",
-        description: "Wycieczka po wyspie, lokalna kuchnia, targ i świątynie.",
+        description:
+          "Wycieczka po wyspie, lokalna kuchnia, targ i świątynie. Kolacja pożegnalna z Samui.",
         tags: ["wycieczka", "kultura"],
+      },
+      {
+        day: 6,
+        title: "Przelot do Krabi",
+        description:
+          "Zmiana scenerii: wapienne klify, dżungla i nowy dom na kolejne pięć dni.",
+        tags: ["relaks"],
+      },
+      {
+        day: 7,
+        title: "Wyspy Phi Phi",
+        description:
+          "Rejs long-tail boatem, snorkeling i laguny, o których marzyłaś oglądając zdjęcia.",
+        tags: ["wycieczka"],
+      },
+      {
+        day: 8,
+        title: "Wysoka wrażliwość",
+        description:
+          "Warsztat o układzie nerwowym, przebodźcowaniu i czułości wobec siebie.",
+        tags: ["warsztat"],
+      },
+      {
+        day: 9,
+        title: "Ruch i woda",
+        description:
+          "Trening funkcjonalny nad zatoką, popołudnie w gorących źródłach, masaż tajski.",
+        tags: ["fitness", "relaks"],
+      },
+      {
+        day: 10,
+        title: "Dzień dla siebie",
+        description:
+          "Bez agendy. Możesz spać, czytać, płynąć albo nie robić absolutnie nic.",
+        tags: ["relaks"],
+      },
+      {
+        day: 11,
+        title: "Witaj, Bali",
+        description:
+          "Przelot na Bali, zakwaterowanie wśród tarasów ryżowych, kolacja powitalna.",
+        tags: ["relaks", "integracja"],
+      },
+      {
+        day: 12,
+        title: "Bliskość i granice",
+        description:
+          "Przedostatni warsztat — o relacjach, komunikowaniu potrzeb i mówieniu „nie”.",
+        tags: ["warsztat"],
+      },
+      {
+        day: 13,
+        title: "Ubud i tarasy ryżowe",
+        description:
+          "Wycieczka do Ubud, świątynia nad wodą, warsztat lokalnej kuchni.",
+        tags: ["wycieczka", "kultura"],
+      },
+      {
+        day: 14,
+        title: "Domknięcie",
+        description:
+          "Warsztat zamknięcia, sesja zdjęciowa o zachodzie słońca i uroczysta kolacja.",
+        tags: ["warsztat", "integracja"],
+      },
+      {
+        day: 15,
+        title: "Powrót",
+        description:
+          "Ostatnia wspólna joga, śniadanie bez pośpiechu i transfer na lotnisko.",
+        tags: ["fitness", "relaks"],
       },
     ],
   },
@@ -200,19 +273,56 @@ export const trips: Trip[] = [
       {
         day: 1,
         title: "Powitanie w Nungwi",
-        description: "Transfer, zakwaterowanie i wieczór zapoznawczy.",
+        description:
+          "Transfer, zakwaterowanie tuż przy plaży i wieczór zapoznawczy przy ognisku.",
         tags: ["relaks", "integracja"],
       },
       {
         day: 2,
         title: "Warsztat otwarcia",
-        description: "Pierwsza sesja warsztatowa nad oceanem.",
+        description:
+          "Pierwsza sesja warsztatowa nad oceanem — intencje, kontrakt, bezpieczna przestrzeń.",
         tags: ["warsztat"],
       },
       {
         day: 3,
         title: "Fitness & laguna",
-        description: "Poranny trening, popołudnie na wodzie.",
+        description:
+          "Poranny trening na piasku, popołudnie na wodzie, zachód słońca z dhow.",
+        tags: ["fitness", "relaks"],
+      },
+      {
+        day: 4,
+        title: "Kobieca energia i ciało",
+        description:
+          "Warsztat o cykliczności, akceptacji ciała i czułości wobec siebie.",
+        tags: ["warsztat"],
+      },
+      {
+        day: 5,
+        title: "Wyspa przypraw",
+        description:
+          "Spice tour, lokalny lunch i przejazd do Stone Town — zupełnie inny Zanzibar.",
+        tags: ["wycieczka", "kultura"],
+      },
+      {
+        day: 6,
+        title: "Wypalenie i odpoczynek",
+        description:
+          "Warsztat o regeneracji układu nerwowego — i praktyka odpoczynku w wersji dosłownej.",
+        tags: ["warsztat", "relaks"],
+      },
+      {
+        day: 7,
+        title: "Domknięcie",
+        description:
+          "Sesja zamknięcia, sesja zdjęciowa w uliczkach Stone Town, uroczysta kolacja.",
+        tags: ["warsztat", "integracja"],
+      },
+      {
+        day: 8,
+        title: "Powrót",
+        description: "Poranna joga, śniadanie bez pośpiechu i transfer na lotnisko.",
         tags: ["fitness", "relaks"],
       },
     ],
@@ -261,22 +371,52 @@ export const trips: Trip[] = [
       {
         day: 1,
         title: "Powitanie w Lizbonie",
-        description: "Transfer, zakwaterowanie i kolacja powitalna.",
+        description:
+          "Transfer, zakwaterowanie w butikowym hotelu i kolacja powitalna z widokiem na Tag.",
         tags: ["relaks", "integracja"],
       },
       {
         day: 2,
         title: "Warsztat otwarcia",
-        description: "Pierwsza sesja warsztatowa.",
+        description:
+          "Pierwsza sesja warsztatowa, a po niej spacer po Alfamie i wieczór z fado.",
+        tags: ["warsztat", "kultura"],
+      },
+      {
+        day: 3,
+        title: "Sintra i ocean",
+        description:
+          "Wycieczka do Sintry, pałace jak z bajki i pierwszy kontakt z Atlantykiem.",
+        tags: ["wycieczka"],
+      },
+      {
+        day: 4,
+        title: "Przejazd na Algarve",
+        description:
+          "Klify, groty i nowy dom na ostatnie dni. Popołudniowa joga nad oceanem.",
+        tags: ["fitness", "relaks"],
+      },
+      {
+        day: 5,
+        title: "Neuroróżnorodność w codzienności",
+        description:
+          "Warsztat o organizowaniu życia, odpoczynku i bliskości w zgodzie ze sobą.",
         tags: ["warsztat"],
+      },
+      {
+        day: 6,
+        title: "Domknięcie i powrót",
+        description:
+          "Krąg zamknięcia o wschodzie słońca, śniadanie bez pośpiechu i transfer na lotnisko.",
+        tags: ["warsztat", "integracja"],
       },
     ],
   },
 ];
 
-export const continents: Continent[] = ["Azja", "Afryka", "Europa", "Ameryka"];
+export const continents: Continent[] = ["Azja", "Afryka", "Europa"];
 
-/** Pomocnicze — docelowo do podmiany na fetch z backendu. */
+/** Pomocnicze — statyczne źródło (fallback dla API, patrz `src/lib/api`). */
 export function getTrips(): Trip[] {
   return trips;
 }
@@ -287,6 +427,10 @@ export function getTripBySlug(slug: string): Trip | undefined {
 
 export function spotsLeft(trip: Trip): number {
   return Math.max(0, trip.capacity - trip.booked);
+}
+
+export function isSoldOut(trip: Trip): boolean {
+  return trip.status === "soldout" || spotsLeft(trip) === 0;
 }
 
 export function formatPrice(value: number): string {
