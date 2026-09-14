@@ -21,12 +21,13 @@ spring:
   threads:
     virtual:
       enabled: true
+  web:
+    error:
+      include-stacktrace: never
+      include-message: never
 
 server:
   port: ${PORT:8080}
-  error:
-    include-message: never
-    include-stacktrace: never
   shutdown: graceful
 
 management:
