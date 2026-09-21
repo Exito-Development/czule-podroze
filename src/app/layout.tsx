@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fraunces, dancing, inter, caprasimo } from "./fonts";
+import { fraunces, dancing, figtree, caprasimo } from "./fonts";
 import { site } from "@/lib/data/site";
 import { siteUrl, defaultDescription, defaultKeywords } from "@/lib/seo";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
@@ -57,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="pl"
-      className={`${fraunces.variable} ${dancing.variable} ${inter.variable} ${caprasimo.variable}`}
+      className={`${fraunces.variable} ${dancing.variable} ${figtree.variable} ${caprasimo.variable}`}
     >
       <body>
         {/* Dane o marce dołączamy raz, w korzeniu — dotyczą całej witryny. */}

@@ -49,6 +49,16 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Polszczyzna ma sporo znaków z ogonkiem i kreską (ą, ę, ł, ó, ż), które
+     przy ciasnej interlinii zderzają się z sąsiednimi wierszami. Stąd nieco
+     luźniejszy wiersz niż domyślny — czyta się spokojniej w akapicie. */
+  line-height: 1.65;
+}
+
+/* Nagłówki mają własny, ciaśniejszy rytm — luźna interlinia akapitu
+   rozstrzeliłaby je na kilka wierszy. */
+h1, h2, h3, h4 {
+  line-height: 1.15;
 }
 
 ::selection {

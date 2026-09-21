@@ -1,7 +1,7 @@
 import {
   Fraunces,
   Dancing_Script,
-  Inter,
+  Figtree,
   Caprasimo,
 } from "next/font/google";
 
@@ -20,8 +20,18 @@ export const dancing = Dancing_Script({
   display: "swap",
 });
 
-/** Tekst podstawowy. */
-export const inter = Inter({
+/**
+ * Tekst podstawowy.
+ *
+ * Figtree zamiast Intera: Inter jest krojem interfejsowym — neutralnym z
+ * założenia — i w dłuższych opisach brzmi bezosobowo obok ciepłego Fraunces
+ * w nagłówkach. Figtree ma miększe, lekko humanistyczne kształty, które
+ * trzymają ten sam ton, a przy tym pozostaje w pełni czytelny w akapicie.
+ *
+ * `latin-ext` jest tu obowiązkowe — bez niego ą, ę, ł, ń, ś, ź i ż podstawiają
+ * się z zapasowego kroju systemowego i tekst zaczyna „skakać" w połowie wyrazu.
+ */
+export const figtree = Figtree({
   subsets: ["latin", "latin-ext"],
   variable: "--font-sans",
   display: "swap",
