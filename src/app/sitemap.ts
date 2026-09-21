@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: absoluteUrl("/faq"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: absoluteUrl("/regulamin"), lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: absoluteUrl("/polityka-prywatnosci"), lastModified: now, changeFrequency: "yearly", priority: 0.2 },
   ];
 
   // Gdy API nie odpowiada, mapa strony i tak musi się zbudować — lepiej oddać

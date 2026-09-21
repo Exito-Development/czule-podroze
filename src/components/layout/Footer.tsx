@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { site } from "@/lib/data/site";
 import { Icon } from "@/components/ui/Icon";
+import UstawieniaCookies from "@/components/layout/UstawieniaCookies";
 
 /**
  * Stopka.
@@ -54,6 +55,14 @@ export default function Footer() {
               <Link href="/regulamin" className="hover:text-ink">
                 Regulamin sklepu
               </Link>
+            </li>
+            <li>
+              <Link href="/polityka-prywatnosci" className="hover:text-ink">
+                Polityka prywatności
+              </Link>
+            </li>
+            <li>
+              <UstawieniaCookies className="hover:text-ink" />
             </li>
           </ul>
         </div>
