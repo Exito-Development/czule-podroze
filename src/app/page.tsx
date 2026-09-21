@@ -8,6 +8,7 @@ import WhyUs from "@/components/sections/WhyUs";
 import Hosts from "@/components/sections/Hosts";
 import CtaJoin from "@/components/sections/CtaJoin";
 import Social from "@/components/sections/Social";
+import Contact from "@/components/sections/Contact";
 import FooterReveal from "@/components/layout/FooterReveal";
 import WaveDivider from "@/components/ui/WaveDivider";
 import { fetchTrips } from "@/lib/api/trips";
@@ -54,6 +55,7 @@ export default async function Home() {
         <WaveDivider bg="var(--color-blush-pale)" fill="var(--color-ivory)" />
 
         <Social />
+        <Contact />
         <CtaJoin />
       </div>
 

@@ -72,7 +72,8 @@ public class SecurityConfig {
                                                 "/api/v1/orders",
                                                 "/api/v1/reservations/**",
                                                 "/api/v1/payments/**",
-                                                "/api/v1/waitlist/**")
+                                                "/api/v1/waitlist/**",
+                                                "/api/v1/contact")
                                         .permitAll()
                                         .requestMatchers(
                                                 "/actuator/health/**",
