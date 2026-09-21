@@ -21,6 +21,7 @@ import TiltCard from "@/components/anim/TiltCard";
 import TripSpine from "@/components/trips/TripSpine";
 import { scrollToId } from "@/lib/scroll";
 import { clsx } from "@/lib/clsx";
+import TripCover from "@/components/ui/TripCover";
 
 type Filter = "Wszystkie" | Continent;
 
@@ -213,8 +214,7 @@ export default function Destinations({ trips }: { trips: Trip[] }) {
                   onBlurCapture={() => preview(null)}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <TripCover
                       src={trip.coverImage}
                       alt={trip.title}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"

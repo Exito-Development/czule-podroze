@@ -43,6 +43,9 @@ import pl.czulapodroz.api.common.error.ApiErrorResponse;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
+
     private final JwtProperties jwtProperties;
 
     public SecurityConfig(JwtProperties jwtProperties) {
@@ -181,6 +184,34 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
-        return source;
+        return logujOdrzucone(source, corsProperties);
+    }
+
+    /**
+     * Dopisuje do źródła CORS ostrzeżenie o odrzuconym adresie strony.
+     *
+     * <p>Odrzucenie jest inaczej całkowicie ciche: przeglądarka dostaje 403
+     * „Invalid CORS request", klientka widzi komunikat o braku połączenia,
+     * a w logach serwera nie ma ani słowa o przyczynie. Przy wdrożeniu, gdy
+     * najłatwiej pomylić się o jeden adres (brak `www`, `http` zamiast
+     * `https`), to jedna linijka różnicy między minutą a wieczorem szukania.
+     */
+    private CorsConfigurationSource logujOdrzucone(
+            CorsConfigurationSource zrodlo, ApiCorsProperties corsProperties) {
+        return request -> {
+            CorsConfiguration konfiguracja = zrodlo.getCorsConfiguration(request);
+            String origin = request.getHeader("Origin");
+            if (konfiguracja != null
+                    && origin != null
+                    && konfiguracja.checkOrigin(origin) == null) {
+                log.warn(
+                        "Odrzucono żądanie z adresu {} — nie ma go na liście czula.cors."
+                                + "allowed-origins {}. Uzupełnij zmienną CORS_ALLOWED_ORIGINS"
+                                + " (pamiętaj o wariancie z www i o https).",
+                        origin,
+                        corsProperties.allowedOrigins());
+            }
+            return konfiguracja;
+        };
     }
 }

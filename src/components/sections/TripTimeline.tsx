@@ -8,6 +8,7 @@ import { formatDateRange, type Trip } from "@/lib/data/trips";
 import { useTripFocus } from "@/components/providers/TripFocusContext";
 import { Icon } from "@/components/ui/Icon";
 import { clsx } from "@/lib/clsx";
+import TripCover from "@/components/ui/TripCover";
 
 const tagColor: Record<string, string> = {
   warsztat: "bg-blush/40 text-ink",
@@ -178,11 +179,10 @@ export default function TripTimeline({ trips }: { trips: Trip[] }) {
                     : "bg-cream/70 text-ink-soft hover:bg-sand"
                 )}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <TripCover
                   src={t.coverImage}
-                  alt=""
-                  aria-hidden
+                  alt={t.title}
+                  decorative
                   className="h-10 w-10 rounded-full object-cover ring-2 ring-ivory/70"
                 />
                 <span>

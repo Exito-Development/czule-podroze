@@ -5,6 +5,7 @@ import { useCart, type CartLine } from "@/components/providers/CartContext";
 import HoldCountdown from "@/components/shop/HoldCountdown";
 import { formatPrice } from "@/lib/data/trips";
 import { clsx } from "@/lib/clsx";
+import TripCover from "@/components/ui/TripCover";
 
 /**
  * Szuflada „Mój wyjazd".
@@ -177,11 +178,10 @@ function CartRow({
 
   return (
     <li className="flex gap-4 rounded-2xl bg-cream/70 p-3">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <TripCover
         src={line.coverImage}
-        alt=""
-        aria-hidden
+        alt={line.title}
+        decorative
         className="h-20 w-20 flex-shrink-0 rounded-xl object-cover"
       />
       <div className="flex-1">

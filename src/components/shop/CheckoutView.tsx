@@ -10,6 +10,7 @@ import { saveReservation } from "@/lib/reservations";
 import { formatPrice } from "@/lib/data/trips";
 import MixedTitle from "@/components/ui/MixedTitle";
 import { clsx } from "@/lib/clsx";
+import TripCover from "@/components/ui/TripCover";
 
 interface FormState {
   firstName: string;
@@ -280,11 +281,10 @@ export default function CheckoutView() {
             <ul className="mt-5 space-y-4">
               {items.map((line) => (
                 <li key={line.id} className="flex gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <TripCover
                     src={line.coverImage}
-                    alt=""
-                    aria-hidden
+                    alt={line.title}
+                    decorative
                     className="h-16 w-16 flex-shrink-0 rounded-xl object-cover"
                   />
                   <div className="flex-1 text-sm">

@@ -6,6 +6,7 @@ import BookingBox from "@/components/shop/BookingBox";
 import FooterReveal from "@/components/layout/FooterReveal";
 import JsonLd from "@/components/seo/JsonLd";
 import { tripSchema, breadcrumbSchema } from "@/lib/schema";
+import TripCover from "@/components/ui/TripCover";
 
 /** Odświeżanie treści wyjazdu — plan bywa zmieniany w panelu. */
 export const revalidate = 60;
@@ -80,8 +81,7 @@ export default async function TripPage({
 
       {/* Hero wyjazdu */}
       <section className="relative z-10 h-[60vh] min-h-[420px] w-full overflow-hidden bg-ink">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <TripCover
           src={trip.coverImage}
           alt={trip.title}
           className="h-full w-full object-cover"
