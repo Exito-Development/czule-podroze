@@ -11,6 +11,7 @@ export const site = {
 
 export const nav = [
   { label: "Nasze wyjazdy", href: "/#destynacje" },
+  { label: "Warsztaty", href: "/warsztaty" },
   { label: "O nas", href: "/#o-nas" },
   { label: "Dlaczego warto", href: "/#dlaczego-warto" },
   { label: "FAQ", href: "/faq" },

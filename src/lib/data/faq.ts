@@ -5,6 +5,26 @@ export interface FaqItem {
 
 export const faqItems: FaqItem[] = [
   {
+    question: "Czy mogę przyjechać sama, jeśli nikogo nie znam?",
+    answer:
+      "Tak i tak przyjeżdża większość uczestniczek. Grupa liczy maksymalnie dziesięć osób, a pierwszy wieczór jest po to, żeby się poznać. Nikt nie zostaje sam przy stole.",
+  },
+  {
+    question: "Czym te wyjazdy różnią się od zwykłych babskich wyjazdów?",
+    answer:
+      "Obok wspólnych kolacji i zwiedzania jest praca warsztatowa prowadzona przez psycholożki i seksuolożkę. To nie są wykłady — pracujemy w kręgu, ćwiczeniami i rozmową, w grupie na tyle małej, żeby dało się być sobą.",
+  },
+  {
+    question: "Czy warsztaty seksuologiczne są krępujące?",
+    answer:
+      "Nikt nie musi mówić więcej, niż chce — to zasada, od której zaczynamy. Rozmawiamy o granicach, zgodzie i bliskości w bezpiecznej przestrzeni, bez ćwiczeń, w których trzeba się przed kimkolwiek odsłaniać.",
+  },
+  {
+    question: "Czy trzeba umieć ćwiczyć jogę albo medytować?",
+    answer:
+      "Nie. Poranne praktyki uważności i joga są dla początkujących, a udział w nich jest dobrowolny — kto woli pospać, śpi.",
+  },
+  {
     question: "Dla kogo są te wyjazdy?",
     answer:
       "Dla kobiet w każdym wieku, które chcą połączyć podróż z pracą nad sobą — niezależnie od tego, czy przyjeżdżasz sama, czy z koleżanką. Grupy są kameralne, więc szybko poznajemy się nawzajem.",

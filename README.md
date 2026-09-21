@@ -135,6 +135,17 @@ Panel admina (`admin/`) ma własny `robots.ts` blokujący wszystko oraz
 `https://czulapodroz.pl`; środowisko testowe musi mieć własny, inaczej Google
 zindeksuje testy jako produkcję.
 
+### Strony pod frazy branżowe
+
+`/warsztaty` opisuje to, co dzieje się na wyjazdach — bo frazy w rodzaju
+„warsztaty dla kobiet", „warsztaty seksuologiczne" czy „mindfulness" nie miały
+wcześniej na czym rankować: strona główna mówi o wyjazdach, nie o ich treści.
+
+Tekst jest pisany pod pytania, z którymi ludzie faktycznie przychodzą, a nie
+pod upychanie fraz — to drugie działa dziś przeciw stronie. FAQ zostało
+rozszerzone o pytania w formie, w jakiej trafiają do wyszukiwarki („czy mogę
+przyjechać sama", „czym to się różni od babskiego wyjazdu").
+
 ### Czego kod nie załatwi
 
 Sama strona nie sprawi, że pojawisz się w Google. Po wdrożeniu:
