@@ -56,6 +56,92 @@ function initialState(trip?: TripDto): FormState {
   };
 }
 
+/** Etykiety pól — te same, które widać w formularzu. */
+const ETYKIETY: Record<string, string> = {
+  slug: "Adres w URL",
+  title: "Nazwa wyjazdu",
+  tagline: "Hasło (podtytuł)",
+  continent: "Kontynent",
+  country: "Kraj",
+  durationDays: "Liczba dni",
+  startDate: "Początek",
+  endDate: "Koniec",
+  price: "Cena za osobę",
+  deposit: "Zadatek",
+  capacity: "Liczba miejsc",
+  coverImage: "Zdjęcie główne",
+  name: "Nazwa",
+  dayRange: "Zakres dni",
+  description: "Opis",
+  image: "Zdjęcie",
+};
+
+type Bledy = Record<string, string>;
+
+/**
+ * Sprawdza formularz przed wysłaniem.
+ *
+ * Dotąd walidację robiło wyłącznie API, a panel pokazywał z niej samo
+ * "Formularz zawiera błędy" — bez wskazania pola. Sprawdzenie tutaj daje
+ * odpowiedź od razu i w miejscu, w którym trzeba poprawić.
+ */
+function sprawdz(form: FormState): Bledy {
+  const bledy: Bledy = {};
+  const pusty = (wartosc: string) => wartosc.trim() === "";
+
+  if (pusty(form.title)) bledy.title = "Podaj nazwę wyjazdu.";
+  if (pusty(form.tagline)) bledy.tagline = "Dodaj krótkie hasło — pokazuje się pod nazwą.";
+  if (pusty(form.country)) bledy.country = "Podaj kraj lub kraje wyjazdu.";
+  if (form.durationDays < 1) bledy.durationDays = "Wyjazd musi trwać co najmniej dzień.";
+  if (pusty(form.startDate)) bledy.startDate = "Wybierz datę rozpoczęcia.";
+  if (pusty(form.endDate)) bledy.endDate = "Wybierz datę zakończenia.";
+  if (!pusty(form.startDate) && !pusty(form.endDate) && form.endDate < form.startDate) {
+    bledy.endDate = "Koniec nie może wypadać przed początkiem.";
+  }
+  if (form.price <= 0) bledy.price = "Podaj cenę większą od zera.";
+  if (form.deposit < 0) bledy.deposit = "Zadatek nie może być ujemny.";
+  if (form.deposit > form.price) bledy.deposit = "Zadatek nie może przewyższać ceny.";
+  if (form.capacity < 1) bledy.capacity = "Musi być przynajmniej jedno miejsce.";
+
+  // Destynacja liczy się dopiero, gdy cokolwiek w niej wpisano — pusty wiersz
+  // dodany przez przypadek nie ma blokować zapisu, bo i tak go odsiewamy.
+  form.destinations.forEach((destynacja, index) => {
+    const cokolwiek =
+      !pusty(destynacja.name) ||
+      !pusty(destynacja.dayRange) ||
+      !pusty(destynacja.description) ||
+      !pusty(destynacja.image);
+    if (!cokolwiek) return;
+    if (pusty(destynacja.name)) bledy[`destinations.${index}.name`] = "Podaj nazwę miejsca.";
+    if (pusty(destynacja.dayRange))
+      bledy[`destinations.${index}.dayRange`] = "Podaj zakres dni, na przykład: Dni 1-5.";
+    if (pusty(destynacja.description))
+      bledy[`destinations.${index}.description`] = "Dodaj krótki opis miejsca.";
+  });
+
+  return bledy;
+}
+
+/**
+ * Zamienia ścieżkę pola z API na klucz używany w formularzu.
+ *
+ * API zgłasza `destinations[0].image`, formularz trzyma `destinations.0.image`.
+ */
+function kluczZApi(sciezka: string): string {
+  return sciezka.replace(/\[(\d+)\]/g, ".$1");
+}
+
+/** Czytelny opis błędu z API — na wypadek reguły, której nie sprawdzamy u siebie. */
+function opisBledu(sciezka: string, komunikat: string): string {
+  const czesci = kluczZApi(sciezka).split(".");
+  const ostatnia = czesci[czesci.length - 1];
+  const etykieta = ETYKIETY[ostatnia] ?? ostatnia;
+  const indeks = czesci.find((czesc) => /^\d+$/.test(czesc));
+  const gdzie = indeks !== undefined ? ` (destynacja ${Number(indeks) + 1})` : "";
+  return `${etykieta}${gdzie}: ${komunikat}`;
+}
+
+
 /** Adres w URL-u budujemy z tytułu — organizatorka nie musi znać pojęcia „slug". */
 function slugify(value: string): string {
   const map: Record<string, string> = {
@@ -88,6 +174,7 @@ export default function TripForm({
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [bledy, setBledy] = useState<Bledy>({});
 
   const isEdit = trip !== undefined;
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -100,12 +187,10 @@ export default function TripForm({
     setProblem(null);
     setSaved(false);
 
-    if (form.deposit > form.price) {
-      setProblem("Zadatek nie może być wyższy niż cena wyjazdu.");
-      return;
-    }
-    if (form.endDate < form.startDate) {
-      setProblem("Data zakończenia nie może być wcześniejsza niż rozpoczęcia.");
+    const znalezione = sprawdz(form);
+    setBledy(znalezione);
+    if (Object.keys(znalezione).length > 0) {
+      setProblem("Uzupełnij pola oznaczone na czerwono.");
       return;
     }
 
@@ -133,18 +218,39 @@ export default function TripForm({
       });
       setSaved(true);
     } catch (exception) {
-      setProblem(
-        exception instanceof ApiError
-          ? exception.message
-          : "Nie udało się zapisać. Spróbuj ponownie."
-      );
+      if (exception instanceof ApiError && exception.fieldErrors.length > 0) {
+        // Reguła, której nie sprawdzamy u siebie — pokazujemy ją przy polu
+        // i wypisujemy w nagłówku, żeby nie trzeba było jej szukać.
+        setBledy(
+          Object.fromEntries(
+            exception.fieldErrors.map((blad) => [kluczZApi(blad.field), blad.message])
+          )
+        );
+        setProblem(
+          exception.fieldErrors
+            .map((blad) => opisBledu(blad.field, blad.message))
+            .join(" · ")
+        );
+      } else {
+        setProblem(
+          exception instanceof ApiError
+            ? exception.message
+            : "Nie udało się zapisać. Spróbuj ponownie."
+        );
+      }
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <form onSubmit={submit} className="space-y-6">
+    /*
+      `noValidate` wyłącza walidację przeglądarki. Jej komunikaty są po
+      angielsku, pokazują się pojedynczo i nie obejmują reguł łączących pola
+      (zadatek kontra cena, koniec kontra początek). Sprawdzamy więc sami —
+      po polsku, wszystko naraz i przy właściwych polach.
+    */
+    <form onSubmit={submit} noValidate className="space-y-6">
       {problem && <Alert>{problem}</Alert>}
       {saved && <Alert tone="success">Zapisano zmiany.</Alert>}
 
@@ -152,6 +258,7 @@ export default function TripForm({
         <div className="grid gap-4 md:grid-cols-2">
           <TextField
             label="Nazwa wyjazdu"
+            error={bledy.title}
             value={form.title}
             onChange={(value) => {
               set("title", value);
@@ -173,6 +280,7 @@ export default function TripForm({
           />
           <TextField
             label="Hasło (podtytuł)"
+            error={bledy.tagline}
             value={form.tagline}
             onChange={(value) => set("tagline", value)}
             required
@@ -186,15 +294,17 @@ export default function TripForm({
           />
           <TextField
             label="Kraj"
+            error={bledy.country}
             value={form.country}
             onChange={(value) => set("country", value)}
             required
           />
           <TextField
             label="Zdjęcie główne (URL)"
+            hint="Nieobowiązkowe — bez niego pokażemy grafikę zastępczą."
+            error={bledy.coverImage}
             value={form.coverImage}
             onChange={(value) => set("coverImage", value)}
-            required
             className="md:col-span-2"
           />
         </div>
@@ -204,6 +314,7 @@ export default function TripForm({
         <div className="grid gap-4 md:grid-cols-3">
           <TextField
             label="Początek"
+            error={bledy.startDate}
             type="date"
             value={form.startDate}
             onChange={(value) => set("startDate", value)}
@@ -211,6 +322,7 @@ export default function TripForm({
           />
           <TextField
             label="Koniec"
+            error={bledy.endDate}
             type="date"
             value={form.endDate}
             onChange={(value) => set("endDate", value)}
@@ -218,6 +330,7 @@ export default function TripForm({
           />
           <NumberField
             label="Liczba dni"
+            error={bledy.durationDays}
             value={form.durationDays}
             onChange={(value) => set("durationDays", value)}
             min={1}
@@ -225,6 +338,7 @@ export default function TripForm({
           />
           <NumberField
             label="Cena za osobę (zł)"
+            error={bledy.price}
             value={form.price}
             onChange={(value) => set("price", value)}
             min={0}
@@ -233,6 +347,7 @@ export default function TripForm({
           />
           <NumberField
             label="Zadatek (zł)"
+            error={bledy.deposit}
             value={form.deposit}
             onChange={(value) => set("deposit", value)}
             min={0}
@@ -242,6 +357,7 @@ export default function TripForm({
           />
           <NumberField
             label="Liczba miejsc"
+            error={bledy.capacity}
             value={form.capacity}
             onChange={(value) => set("capacity", value)}
             min={1}
@@ -360,6 +476,8 @@ export default function TripForm({
                 <div className="grid gap-3 md:grid-cols-2">
                   <TextField
                     label="Nazwa"
+                    required
+                    error={bledy[`destinations.${index}.name`]}
                     value={destination.name}
                     onChange={(value) => {
                       const next = [...form.destinations];
@@ -369,6 +487,8 @@ export default function TripForm({
                   />
                   <TextField
                     label="Zakres dni"
+                    required
+                    error={bledy[`destinations.${index}.dayRange`]}
                     value={destination.dayRange}
                     onChange={(value) => {
                       const next = [...form.destinations];
@@ -379,6 +499,8 @@ export default function TripForm({
                   />
                   <TextField
                     label="Zdjęcie (URL)"
+                    hint="Nieobowiązkowe — bez niego pokażemy grafikę zastępczą."
+                    error={bledy[`destinations.${index}.image`]}
                     value={destination.image}
                     onChange={(value) => {
                       const next = [...form.destinations];
@@ -389,6 +511,8 @@ export default function TripForm({
                   />
                   <TextAreaField
                     label="Opis"
+                    required
+                    error={bledy[`destinations.${index}.description`]}
                     value={destination.description}
                     onChange={(value) => {
                       const next = [...form.destinations];

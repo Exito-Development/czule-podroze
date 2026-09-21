@@ -6,6 +6,8 @@ interface BaseProps {
   label: string;
   hint?: string;
   required?: boolean;
+  /** Komunikat walidacji — pokazywany zamiast podpowiedzi, przy samym polu. */
+  error?: string;
   className?: string;
 }
 
@@ -13,6 +15,7 @@ function Wrapper({
   label,
   hint,
   required,
+  error,
   className,
   children,
 }: BaseProps & { children: React.ReactNode }) {
@@ -23,7 +26,13 @@ function Wrapper({
         {required && <span className="text-blush"> *</span>}
       </span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-ink-faint">{hint}</span>}
+      {/* Błąd wypiera podpowiedź: dwa teksty pod polem czyta się gorzej niż
+          jeden, a w chwili błędu to on jest potrzebny. */}
+      {error ? (
+        <span className="mt-1 block text-xs font-medium text-red-700">{error}</span>
+      ) : (
+        hint && <span className="mt-1 block text-xs text-ink-faint">{hint}</span>
+      )}
     </label>
   );
 }
